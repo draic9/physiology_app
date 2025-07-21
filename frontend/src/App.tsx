@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import ExperimentMenu from "./pages/ExperimentMenu";
+import TopNav from "./components/TopNav";
 
 const techStack = [
   { name: "React", logo: reactLogo, url: "https://react.dev" },
@@ -14,7 +15,14 @@ const techStack = [
 ];
 
 function Dashboard() {
-  return <ExperimentMenu />;
+  return (
+    <>
+      <TopNav />
+      <div className="pt-16">
+        <ExperimentMenu />
+      </div>
+    </>
+  );
 }
 
 function RequireAuth({ children }: { children: JSX.Element }) {
