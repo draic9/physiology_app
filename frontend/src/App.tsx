@@ -77,8 +77,11 @@ export default function App() {
               Count: {count}
             </button>
           </div>
+          <div className="p-4 mt-6 rounded-2xl bg-gray-200 dark:bg-pink-600 text-black dark:text-white text-center">
+            This box should be <b>pink</b> in dark mode and <b>gray</b> in light mode.
+          </div>
           <footer className="mt-10 text-center text-xs opacity-60 w-full text-gray-600 dark:text-gray-300">
-            &copy; {new Date().getFullYear()} Physiologi
+            &copy; {new Date().getFullYear()} Physiologi powered by <strong>big coq</strong>
           </footer>
         </div>
       </div>

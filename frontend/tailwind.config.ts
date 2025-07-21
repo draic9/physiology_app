@@ -1,3 +1,6 @@
+// This thing might be redundant, but I'm not sure.
+// Documnetation doesn't say anything about it, but AI said to add it.
+
 import type { Config } from "tailwindcss";
 
 const config: Config = {
