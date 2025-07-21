@@ -5,6 +5,8 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import ExperimentMenu from "./pages/ExperimentMenu";
 import TopNav from "./components/TopNav";
+import ExperimentScreen from "./pages/ExperimentScreen";
+import ProtectedLayout from "./components/ProtectedLayout";
 
 const techStack = [
   { name: "React", logo: reactLogo, url: "https://react.dev" },
@@ -18,7 +20,7 @@ function Dashboard() {
   return (
     <>
       <TopNav />
-      <div className="pt-16">
+      <div>
         <ExperimentMenu />
       </div>
     </>
@@ -42,7 +44,19 @@ export default function App() {
         path="/dashboard"
         element={
           <RequireAuth>
-            <Dashboard />
+            <ProtectedLayout>
+              <Dashboard />
+            </ProtectedLayout>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/experiment/:id"
+        element={
+          <RequireAuth>
+            <ProtectedLayout>
+              <ExperimentScreen />
+            </ProtectedLayout>
           </RequireAuth>
         }
       />

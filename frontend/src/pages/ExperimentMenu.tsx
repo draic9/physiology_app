@@ -1,4 +1,5 @@
 import { LockClosedIcon } from '@heroicons/react/24/solid';
+import { useNavigate } from "react-router-dom";
 
 const experiments = [
   {
@@ -40,8 +41,9 @@ const experiments = [
 ];
 
 export default function ExperimentMenu() {
+  const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center py-12 px-4">
+    <div className="bg-gray-50 dark:bg-gray-900 flex flex-col items-center pt-10 pb-10 px-4">
       <h1 className="text-3xl font-bold mb-8 text-emerald-600 dark:text-emerald-300">Experiments</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-3xl">
         {experiments.map((exp) => (
@@ -63,7 +65,7 @@ export default function ExperimentMenu() {
             </div>
             <p className="text-gray-700 dark:text-gray-200 mb-2">{exp.description}</p>
             {exp.unlocked ? (
-              <button className="mt-auto px-4 py-2 rounded bg-emerald-500 hover:bg-emerald-600 text-white font-semibold transition">
+              <button className="mt-auto px-4 py-2 rounded bg-emerald-500 hover:bg-emerald-600 text-white font-semibold transition" onClick={() => navigate(`/experiment/${exp.id}`)}>
                 Open
               </button>
             ) : (

@@ -3,9 +3,9 @@
 // and the latter says to use this file, but the former doesn't. 
 // I'm using both, so I'm not sure.
 
-const config = {
-    plugins: {
-      "@tailwindcss/postcss": {},
-    },
-  };
-  export default config;
+// const config = {
+//     plugins: {
+//       "@tailwindcss/postcss": {},
+//     },
+//   };
+//   export default config;
