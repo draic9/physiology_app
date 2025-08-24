@@ -58,13 +58,20 @@ export default function ExperimentScreen() {
   // Handle panel resizing
   const handleResize = (e: React.MouseEvent) => {
     if (panelMode === 'side') {
+      e.preventDefault();
+      e.stopPropagation();
+      
       const startX = e.clientX;
       const startWidth = panelWidth;
       
       const handleMouseMove = (e: MouseEvent) => {
         const deltaX = startX - e.clientX;
         const newWidth = Math.max(20, Math.min(48, startWidth + deltaX / 16)); // Convert pixels to rem, min 20rem, max 48rem
-        setPanelWidth(newWidth);
+        
+        // Safety check: prevent going full screen
+        if (newWidth >= 20 && newWidth <= 48) {
+          setPanelWidth(newWidth);
+        }
       };
       
       const handleMouseUp = () => {
@@ -76,6 +83,20 @@ export default function ExperimentScreen() {
       document.addEventListener('mouseup', handleMouseUp);
     }
   };
+
+  // Reset panel width when switching modes
+  const handleModeChange = (newMode: 'side' | 'cover') => {
+    setPanelMode(newMode);
+    if (newMode === 'side') {
+      setPanelWidth(32); // Reset to default width when switching to side mode
+    }
+  };
+
+  // Safety check: ensure panel width stays within bounds
+  useEffect(() => {
+    if (panelWidth < 20) setPanelWidth(20);
+    if (panelWidth > 48) setPanelWidth(48);
+  }, [panelWidth]);
 
   if (!experiment) {
     return (
@@ -118,12 +139,24 @@ export default function ExperimentScreen() {
               title="Drag to resize panel"
             />
           )}
+          
+          {/* Reset Width Button - Only show in side mode */}
+          {panelMode === 'side' && (
+            <button
+              onClick={() => setPanelWidth(32)}
+              className="absolute left-2 top-2 p-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 text-xs transition-colors"
+              title="Reset panel width"
+            >
+              ↺
+            </button>
+          )}
+          
           <ExperimentExplainer 
             experiment={experiment}
             isOpen={isPanelOpen}
             mode={panelMode}
             onToggle={() => setIsPanelOpen(!isPanelOpen)}
-            onModeChange={setPanelMode}
+            onModeChange={handleModeChange}
           />
         </div>
 
