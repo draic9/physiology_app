@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   PlayIcon, 
   PauseIcon, 
@@ -20,9 +20,7 @@ interface CardiacActionPotentialSimulatorProps {
 }
 
 const CardiacActionPotentialSimulator = ({
-  onDataChange,
   onRun,
-  results,
   isRunning
 }: CardiacActionPotentialSimulatorProps) => {
   const [time, setTime] = useState(0);
@@ -36,8 +34,8 @@ const CardiacActionPotentialSimulator = ({
   const [stimulationRate, setStimulationRate] = useState(1); // Hz
   const [simulationSpeed, setSimulationSpeed] = useState(1); // 1x real time
   const [pharmacologyCollapsed, setPharmacologyCollapsed] = useState(false);
-  const intervalRef = useRef<number | null>(null);
-  const lastStimulus = useRef(0);
+  const animationFrameRef = useRef<number | null>(null);
+  const lastUpdateTime = useRef(0);
 
   // Parametry podstawowe z dokumentu
   const baseParams = {
@@ -56,7 +54,7 @@ const CardiacActionPotentialSimulator = ({
   };
 
   // Model farmakodynamiczny
-  const calculateDrugEffect = (drug: string, concentration: number) => {
+  const calculateDrugEffect = useCallback((drug: string, concentration: number) => {
     const drugModels: Record<string, {IC50: number, hillCoeff: number, maxBlock: number}> = {
       TTX: { IC50: 0.01, hillCoeff: 1, maxBlock: 0.95 },
       verapamil: { IC50: 0.1, hillCoeff: 1, maxBlock: 0.85 },
@@ -69,10 +67,10 @@ const CardiacActionPotentialSimulator = ({
     const fraction = Math.pow(concentration, model.hillCoeff) / 
                     (Math.pow(model.IC50, model.hillCoeff) + Math.pow(concentration, model.hillCoeff));
     return 1 - (model.maxBlock * fraction);
-  };
+  }, []);
 
   // Model potencjału czynnościowego
-  const calculateActionPotential = (t: number, stimulated: boolean) => {
+  const calculateActionPotential = useCallback((t: number, stimulated: boolean) => {
     const params = baseParams[cellType as keyof typeof baseParams];
     const cycleDuration = 1000 / stimulationRate; // ms
     const timeInCycle = t % cycleDuration;
@@ -117,52 +115,87 @@ const CardiacActionPotentialSimulator = ({
     }
 
     return Math.round(voltage * 10) / 10;
-  };
+  }, [cellType, stimulationRate, drugs, calculateDrugEffect]);
 
-  // Symulacja z uwzględnieniem prędkości
+  // Symulacja z użyciem requestAnimationFrame dla lepszej wydajności
+  const animate = useCallback((currentTime: number) => {
+    if (!isRunning) return;
+
+    // Inicjalizacja lastUpdateTime jeśli to pierwszy frame
+    if (lastUpdateTime.current === 0) {
+      lastUpdateTime.current = currentTime;
+    }
+
+    // Sprawdź czy minęło wystarczająco czasu (60 FPS = ~16.67ms)
+    if (currentTime - lastUpdateTime.current >= 16) {
+      setTime(prevTime => {
+        const newTime = prevTime + simulationSpeed;
+        const cycleDuration = 1000 / stimulationRate;
+        const shouldStimulate = newTime % cycleDuration < 5;
+        
+        const voltage = calculateActionPotential(newTime, shouldStimulate);
+        
+        setData(prevData => {
+          const newData = [...prevData, { time: newTime, voltage, stimulated: shouldStimulate }];
+          // Ogranicz do 1000 punktów dla lepszej wydajności
+          return newData.length > 1000 ? newData.slice(-1000) : newData;
+        });
+        
+        return newTime;
+      });
+      
+      // Aktualizuj lastUpdateTime tylko po udanym update
+      lastUpdateTime.current = currentTime;
+    }
+
+    // Kontynuuj animację
+    animationFrameRef.current = requestAnimationFrame(animate);
+  }, [isRunning, simulationSpeed, stimulationRate, calculateActionPotential]);
+
   useEffect(() => {
     if (isRunning) {
-      intervalRef.current = window.setInterval(() => {
-        setTime(prevTime => {
-          const newTime = prevTime + simulationSpeed;
-          const cycleDuration = 1000 / stimulationRate;
-          const shouldStimulate = newTime % cycleDuration < 5; // Stymulacja przez pierwsze 5ms cyklu
-          
-          const voltage = calculateActionPotential(newTime, shouldStimulate);
-          
-          setData(prevData => {
-            const newData = [...prevData, { time: newTime, voltage, stimulated: shouldStimulate }];
-            return newData.length > 2000 ? newData.slice(-2000) : newData;
-          });
-          
-          return newTime;
-        });
-      }, 1);
+      // Reset lastUpdateTime gdy symulacja się rozpoczyna
+      lastUpdateTime.current = 0;
+      animationFrameRef.current = requestAnimationFrame(animate);
     } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
     }
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
     };
-  }, [isRunning, stimulationRate, cellType, drugs, simulationSpeed]);
+  }, [isRunning, animate]);
 
   const handleReset = () => {
+    // Zatrzymaj symulację
     onRun(); // This will stop the simulation via parent
+    
+    // Reset stanu
     setTime(0);
     setData([]);
+    
+    // Reset timing state
+    lastUpdateTime.current = 0;
+    
+    // Upewnij się, że animation frame jest wyczyszczony
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
   };
 
-  const handleDrugChange = (drugName: string, field: string, value: any) => {
+  const handleDrugChange = (drugName: string, field: string, value: string | boolean) => {
     setDrugs(prev => ({
       ...prev,
       [drugName]: {
         ...prev[drugName as keyof typeof prev],
-        [field]: field === 'concentration' ? parseFloat(value) || 0 : value
+        [field]: field === 'concentration' ? parseFloat(value as string) || 0 : value
       }
     }));
   };
@@ -183,19 +216,11 @@ const CardiacActionPotentialSimulator = ({
     return 'Faza 4 (Spoczynek)';
   };
 
+  // Dark mode detection
+  const isDarkMode = document.documentElement.classList.contains('dark');
+
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
-      <div className="text-center mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2 flex items-center justify-center gap-2">
-          <HeartIcon className="h-8 w-8 text-red-500" />
-          Symulator Potencjału Czynnościowego Kardiomiocytów
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
-          Interaktywny model wpływu leków na przewodnictwo elektryczne serca
-        </p>
-      </div>
-
       {/* Desktop: 2-column grid, Mobile: 1-column */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
@@ -335,14 +360,14 @@ const CardiacActionPotentialSimulator = ({
               </defs>
               
               {/* Siatka */}
-              <g stroke="#e5e7eb" strokeWidth="1" opacity="0.5">
+              <g stroke={isDarkMode ? "#374151" : "#e5e7eb"} strokeWidth="1" opacity="0.5">
                 {/* Linie poziome */}
                 {[-100, -75, -50, -25, 0, 25, 50].map(voltage => {
                   const y = 150 - (voltage * 150 / 125);
                   return (
                     <g key={voltage}>
                       <line x1="60" y1={y} x2="760" y2={y} />
-                      <text x="50" y={y + 4} fontSize="10" textAnchor="end" fill="#6b7280">
+                      <text x="50" y={y + 4} fontSize="10" textAnchor="end" fill={isDarkMode ? "#9ca3af" : "#6b7280"}>
                         {voltage}mV
                       </text>
                     </g>
@@ -354,7 +379,7 @@ const CardiacActionPotentialSimulator = ({
                   return (
                     <g key={t}>
                       <line x1={x} y1="20" x2={x} y2="280" />
-                      <text x={x} y="295" fontSize="10" textAnchor="middle" fill="#6b7280">
+                      <text x={x} y="295" fontSize="10" textAnchor="middle" fill={isDarkMode ? "#9ca3af" : "#6b7280"}>
                         {t}ms
                       </text>
                     </g>
@@ -363,7 +388,7 @@ const CardiacActionPotentialSimulator = ({
               </g>
               
               {/* Oś X i Y */}
-              <g stroke="#374151" strokeWidth="2">
+              <g stroke={isDarkMode ? "#d1d5db" : "#374151"} strokeWidth="2">
                 <line x1="60" y1="20" x2="60" y2="280" />
                 <line x1="60" y1="280" x2="760" y2="280" />
               </g>
@@ -400,7 +425,7 @@ const CardiacActionPotentialSimulator = ({
               })}
               
               {/* Etykiety faz */}
-              <g fontSize="12" fill="#4b5563" textAnchor="middle">
+              <g fontSize="12" fill={isDarkMode ? "#d1d5db" : "#4b5563"} textAnchor="middle">
                 <text x="100" y="15">Faza 0</text>
                 <text x="150" y="15">Faza 1</text>
                 <text x="300" y="15">Faza 2 (Plateau)</text>

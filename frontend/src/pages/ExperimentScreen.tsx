@@ -43,19 +43,19 @@ const experimentConfigs: Record<number, Experiment> = {
   },
   2: {
     id: 2,
-    name: 'Cardiac Muscle Physiology',
-    description: 'The first attempt at creating the experiment.',
-    unlocked: true,
-    markdownFile: '/markdown/cardiac-muscle.md',
-    component: 'CardiacMuscleExperiment'
+    name: 'Digestive Enzyme Kinetics',
+    description: 'Study enzyme-substrate interactions in the digestive system.',
+    unlocked: false,
+    markdownFile: '/markdown/digestive-enzymes.md',
+    component: 'DigestiveExperiment'
   },
   3: {
     id: 3,
-    name: 'Cardiomyocyte Potential Template',
-    description: 'A blank canvas for another attempt at making the experiment.',
-    unlocked: true,
-    markdownFile: '/markdown/cardiomyocyte-potential.md',
-    component: 'CardiomyocytePotentialExperiment'
+    name: 'Neural Plasticity',
+    description: 'Investigate synaptic strength changes and learning mechanisms.',
+    unlocked: false,
+    markdownFile: '/markdown/neural-plasticity.md',
+    component: 'NeuralPlasticityExperiment'
   },
   4: {
     id: 4,
@@ -176,22 +176,6 @@ const experimentConfigs: Record<number, Experiment> = {
     unlocked: false,
     markdownFile: '/markdown/immune-response.md',
     component: 'ImmuneExperiment'
-  },
-  19: {
-    id: 19,
-    name: 'Digestive Enzyme Kinetics',
-    description: 'Study enzyme-substrate interactions in the digestive system.',
-    unlocked: false,
-    markdownFile: '/markdown/digestive-enzymes.md',
-    component: 'DigestiveExperiment'
-  },
-  20: {
-    id: 20,
-    name: 'Neural Plasticity',
-    description: 'Investigate synaptic strength changes and learning mechanisms.',
-    unlocked: false,
-    markdownFile: '/markdown/neural-plasticity.md',
-    component: 'NeuralPlasticityExperiment'
   }
 };
 
@@ -249,13 +233,7 @@ export default function ExperimentScreen() {
 
         {/* Side Panel */}
         <div className={`fixed top-16 right-0 h-[calc(100vh-4rem)] bg-white dark:bg-gray-800 shadow-2xl transition-all duration-300 ease-in-out z-40 ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'} ${panelMode === 'side' ? 'w-[32rem] lg:block' : 'w-full lg:w-[36rem]'}`}>
-          <ExperimentExplainer 
-            experiment={experiment} 
-            isOpen={isPanelOpen} 
-            mode={panelMode} 
-            onToggle={() => setIsPanelOpen(!isPanelOpen)} 
-            onModeChange={setPanelMode} 
-          />
+          <ExperimentExplainer experiment={experiment} mode={panelMode} onToggle={() => setIsPanelOpen(!isPanelOpen)} onModeChange={setPanelMode} />
         </div>
 
         {/* Panel Toggle Button - Smart positioning for both modes */}

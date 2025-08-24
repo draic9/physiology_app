@@ -1,16 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { marked } from 'marked';
 import type { Experiment } from '../types/experiment';
 
 interface ExperimentExplainerProps {
-  experiment: Experiment;
-  isOpen: boolean;
+  experiment: Experiment | null;
   mode: 'side' | 'cover';
   onToggle: () => void;
   onModeChange: (mode: 'side' | 'cover') => void;
 }
 
-// Markdown content for each experiment (now hardcoded)
+// Markdown content for each experiment (fallback)
 const EXPERIMENT_MARKDOWN: Record<string, string> = {
   'Cardiac Action Potential Simulator': `# Symulator Potencjału Czynnościowego Kardiomiocytów
 
@@ -195,360 +194,125 @@ Jest to faza, w której potencjał kardiomiocytu uzyskał wartość potencjału 
 Jest to neurotoksyna powodująca selektywne zamknięcie kanałów sodowych napięciozależnych, co powoduje wyraźne zmniejszenie szybkości depolaryzacji, która ma miejsce w Fazie 0.
 
 ### Niedihydropirydyny (werapamil, diltiazem)
-Blokują kanały napięciozależne L-Ca²⁺ w Fazie 2, co wpływa hamująco na powstawanie sprzężenia pobudzeniowo-skurczowego i uniemożliwia powstanie repolaryzacji miocytu.
-
----
-
-## ZNACZENIE KLINICZNE
-
-### Arytmie
-- **Blok przewodzenia** na dowolnym poziomie (SA, AV, His, Purkinje)
-- **Obwody re-entry** spowodowane spowolnionym przewodzeniem
-- **Ogniska ektopowe** gdy węzeł SA zawodzi
-- **Bradykardia** vs **tachykardia**
-
-### Wpływ leków
-- **Leki antyarytmiczne** celują w określone kanały jonowe
-- **Blokery kanałów Ca²⁺** zmniejszają kurczliwość
-- **Blokery kanałów Na⁺** spowalniają przewodzenie
-
-### Zaburzenia układu przewodzącego
-- **Dysfunkcja węzła SA** (zespół chorego węzła)
-- **Blok AV** (I°, II°, III°)
-- **Blok odnogi pęczka** (lewa/prawa)
-- **Zespół Wolffa-Parkinsona-White'a**`,
-
-  'Cardiomyocyte Potential': `# Cardiomyocyte Potential Experiment
+Blokują kanały napięciozależne L-Ca²⁺ w Fazie 2, co wpływa hamująco na powstawanie sprzężenia pobudzeniowo-skurczowego i uniemożliwia powstanie repolaryzacji miocytu.`,
+  'Cardiomyocyte Potential Template': `# Cardiomyocyte Potential Experiment
 
 ## Overview
-Advanced cardiac electrophysiology simulation with detailed ion channel modeling and mathematical precision.
+Advanced cardiac electrophysiology simulation with detailed ion channel modeling and real-time visualization.
 
-## Experiment Goals
-- **Real-time simulation** of cardiac action potential
-- **Detailed ion channel kinetics** modeling
-- **Pharmacological intervention** effects
-- **Physiological parameter** manipulation
-- **Advanced mathematical models** implementation
+## Features
+- Real-time action potential simulation
+- Ion channel dynamics modeling
+- Drug effects simulation
+- Interactive parameter control
+- Comprehensive data analysis
 
-## Key Features
+## Parameters
+- Stimulus strength and frequency
+- Temperature effects
+- Ion concentrations
+- Drug interventions
+- Cell type selection
 
-### Ion Channel Modeling
-- **Na+ channels**: Fast activation, voltage-dependent inactivation
-- **K+ channels**: Multiple types (IKr, IKs, IK1, Ito)
-- **Ca2+ channels**: L-type and T-type with detailed kinetics
-- **Background currents**: Maintaining resting potential
+## Expected Results
+- Action potential waveforms
+- Ion current analysis
+- Drug effect quantification
+- Conduction velocity measurements
 
-### Mathematical Models
-- **Hodgkin-Huxley formalism** for channel gating
-- **Goldman-Hodgkin-Katz equations** for ion fluxes
-- **Nernst equation** for equilibrium potentials
-- **Hill equation** for drug-receptor interactions
-
-### Real-time Simulation
-- **1000Hz sampling rate** for smooth waveforms
-- **Adaptive time stepping** for efficiency
-- **Parameter sensitivity analysis**
-- **Multiple cell types** (atrial, ventricular, Purkinje)
-
-## Experimental Parameters
-
-### Basic Stimulation
-- **Stimulus strength**: 0-20 mA (threshold determination)
-- **Frequency**: 0-200 Hz (rate-dependent effects)
-- **Duration**: 0-1000 ms (refractory period analysis)
-
-### Physiological Variables
-- **Temperature**: 20-45°C (Q10 effects on kinetics)
-- **Extracellular K+**: 1-20 mM (resting potential effects)
-- **Extracellular Ca2+**: 0.5-10 mM (plateau phase effects)
-- **pH**: 6.5-8.0 (proton effects on channels)
-
-### Advanced Parameters
-- **Cell type selection**: Atrial vs. ventricular vs. Purkinje
-- **Conduction path**: Normal vs. detailed (SA→AV→His→Purkinje)
-- **Ion channel mutations**: Pathological variants
-- **Metabolic state**: ATP levels, oxidative stress
-
-## Pharmacological Interventions
-
-### Na+ Channel Blockers
-- **Tetrodotoxin (TTX)**: Selective Na+ channel blocker
-- **Lidocaine**: Use-dependent Na+ channel inhibition
-- **Flecainide**: Class IC antiarrhythmic
-
-### Ca2+ Channel Blockers
-- **Verapamil**: L-type Ca2+ channel blocker
-- **Diltiazem**: Non-dihydropyridine Ca2+ blocker
-- **Nifedipine**: Dihydropyridine Ca2+ blocker
-
-### K+ Channel Modulators
-- **Dofetilide**: IKr blocker (Class III)
-- **Amiodarone**: Multiple channel effects
-- **Sotalol**: β-blocker + K+ channel blocker
-
-## Expected Outcomes
-
-### Action Potential Analysis
-- **Phase durations**: 0, 1, 2, 3, 4 timing
-- **Amplitude changes**: Overshoot, plateau levels
-- **Slope measurements**: Depolarization and repolarization rates
-- **Refractory periods**: Absolute and relative
-
-### Ion Current Analysis
-- **Peak currents**: Maximum Na+, Ca2+, K+ fluxes
-- **Current integrals**: Total charge movement
-- **Channel kinetics**: Activation/inactivation time constants
-- **Equilibrium potentials**: Nernst calculations
-
-### Drug Effects
-- **IC50 values**: Concentration-response curves
-- **Hill coefficients**: Cooperativity analysis
-- **Use-dependence**: Frequency-dependent effects
-- **Recovery kinetics**: Washout time courses
-
-## Clinical Applications
-
-### Arrhythmia Mechanisms
-- **Re-entry circuits**: Mathematical modeling
-- **Triggered activity**: Early/late afterdepolarizations
-- **Automaticity**: Enhanced pacemaker activity
-- **Conduction block**: Rate-dependent phenomena
-
-### Drug Development
-- **Safety assessment**: Proarrhythmic potential
-- **Efficacy optimization**: Dose-response relationships
-- **Combination therapy**: Synergistic effects
-- **Personalized medicine**: Genotype-specific responses
-
-### Educational Value
-- **Medical students**: Cardiac physiology fundamentals
-- **Cardiologists**: Advanced electrophysiology concepts
-- **Researchers**: Experimental design principles
-- **Pharmaceutical industry**: Drug development insights
-
-## Technical Implementation
-
-### Simulation Engine
-- **Differential equations**: ODE solver integration
-- **Matrix operations**: Linear algebra for efficiency
-- **Memory management**: Optimized data structures
-- **Parallel processing**: Multi-core utilization
-
-### Visualization
-- **Real-time plotting**: Chart.js integration
-- **Parameter controls**: Interactive sliders and inputs
-- **Data export**: CSV, JSON, MATLAB formats
-- **Screenshot capture**: High-resolution images
-
-### Data Analysis
-- **Statistical analysis**: Mean, SD, SEM calculations
-- **Curve fitting**: Exponential, sigmoidal functions
-- **Frequency analysis**: FFT for periodic phenomena
-- **Correlation analysis**: Parameter relationships
-
-## Future Enhancements
-
-### Advanced Models
-- **Multi-compartment models**: Cell geometry effects
-- **Tissue-level simulation**: Conduction velocity
-- **Organ-level modeling**: Whole heart simulation
-- **Patient-specific models**: Individual variations
-
-### Machine Learning
-- **Parameter optimization**: Automated fitting
-- **Pattern recognition**: Arrhythmia classification
-- **Predictive modeling**: Drug response prediction
-- **Anomaly detection**: Pathological identification
-
-### Integration
-- **ECG simulation**: Surface potential mapping
-- **Imaging data**: MRI/CT anatomical correlation
-- **Clinical databases**: Patient outcome correlation
-- **Research platforms**: Multi-center collaboration
-
----
-
-*This experiment represents the cutting edge of computational cardiac electrophysiology, combining rigorous mathematical modeling with intuitive user interface design to advance our understanding of heart function and disease.*`,
-
+*This is a template for advanced cardiac electrophysiology experiments.*`,
   'Skeletal Muscle Response': `# Skeletal Muscle Response Experiment
 
 ## Overview
 Investigate the relationship between stimulus strength and muscle contraction in skeletal muscle tissue.
 
-## Background
-Skeletal muscle tissue responds to electrical stimulation in predictable ways. This experiment explores the fundamental principles of muscle physiology, including the all-or-none principle, summation, and fatigue mechanisms.
-
 ## Key Concepts
+- Muscle contraction physiology
+- Stimulus-response relationships
+- Force generation mechanisms
+- Fatigue and recovery processes
 
-### Muscle Contraction Physiology
-- **Motor unit**: Single motor neuron + muscle fibers
-- **All-or-none principle**: Individual fibers contract fully or not at all
-- **Motor unit recruitment**: Size principle (smaller units recruited first)
-- **Frequency coding**: Rate of stimulation affects force
-
-### Stimulus-Response Relationships
-- **Threshold stimulus**: Minimum stimulus to produce contraction
-- **Subthreshold**: No response
-- **Threshold**: Minimal response
-- **Suprathreshold**: Increased response up to maximum
-
-### Force Generation
-- **Twitch**: Single stimulus response
-- **Summation**: Multiple stimuli before relaxation
-- **Tetanus**: Sustained contraction at high frequency
-- **Fatigue**: Decreased force with prolonged stimulation
-
-### Fatigue Mechanisms
-- **Metabolic**: ATP depletion, lactic acid accumulation
-- **Neural**: Synaptic fatigue, neurotransmitter depletion
-- **Muscular**: Ca2+ handling, contractile protein changes
-- **Cardiovascular**: Blood flow limitations
-
-## Experimental Parameters
-
-### Stimulation
-- **Stimulus strength**: 0-20 mA (threshold determination)
-- **Frequency**: 0-100 Hz (summation and tetanus)
-- **Duration**: 0-1000 ms (contraction timing)
-
-### Measurement
-- **Force**: Contraction strength (N or g)
-- **Time**: Contraction and relaxation duration
-- **Area**: Force-time integral
-- **Rate**: Force development and relaxation
+## Parameters
+- Stimulus strength (voltage)
+- Stimulus frequency
+- Muscle length
+- Temperature
+- Fatigue protocols
 
 ## Expected Results
+- Force-frequency relationships
+- Length-tension curves
+- Fatigue curves
+- Recovery kinetics
 
-### Stimulus Strength Response
-- **Subthreshold**: No contraction
-- **Threshold**: Minimal twitch
-- **Linear range**: Force proportional to stimulus
-- **Maximum**: No further increase in force
-
-### Frequency Response
-- **Low frequency**: Separate twitches
-- **Increasing frequency**: Summation begins
-- **High frequency**: Tetanus achieved
-- **Very high frequency**: Fatigue development
-
-### Time Course
-- **Latency**: Delay from stimulus to response
-- **Contraction time**: Force development
-- **Relaxation time**: Force decline
-- **Refractory period**: Cannot respond to new stimulus
-
-## Analysis Questions
-
-### Threshold Determination
-- What is the minimum stimulus for muscle activation?
-- How does threshold vary between individuals?
-- What factors affect threshold (temperature, fatigue, etc.)?
-
-### Summation Effects
-- How does frequency affect force production?
-- What is the optimal frequency for maximum force?
-- When does tetanus occur?
-
-### Fatigue Analysis
-- How quickly does fatigue develop?
-- What is the pattern of force decline?
-- Can fatigue be reversed with rest?
-
-## Clinical Applications
-
-### Physical Therapy
-- **Strength training**: Optimal stimulation parameters
-- **Rehabilitation**: Progressive resistance exercise
-- **Neuromuscular re-education**: Motor control training
-
-### Sports Medicine
-- **Performance optimization**: Training intensity and frequency
-- **Injury prevention**: Fatigue management
-- **Recovery protocols**: Rest and regeneration
-
-### Research Applications
-- **Muscle physiology**: Basic research questions
-- **Drug development**: Muscle relaxants, stimulants
-- **Disease models**: Muscular dystrophy, myasthenia
-
-## Technical Considerations
-
-### Equipment
-- **Stimulator**: Constant current or voltage
-- **Force transducer**: Load cell or strain gauge
-- **Data acquisition**: High sampling rate (>1000 Hz)
-- **Analysis software**: Real-time display and recording
-
-### Data Quality
-- **Signal-to-noise ratio**: Clear force measurements
-- **Calibration**: Accurate force and time measurements
-- **Artifact rejection**: Movement and electrical interference
-- **Reproducibility**: Consistent experimental conditions
-
-### Safety
-- **Electrical safety**: Proper grounding and isolation
-- **Subject comfort**: Non-painful stimulation levels
-- **Monitoring**: Vital signs and discomfort assessment
-- **Emergency procedures**: Stop stimulation if needed
-
-## Future Directions
-
-### Advanced Measurements
-- **EMG**: Electrical activity recording
-- **Ultrasound**: Muscle architecture changes
-- **Biochemical**: Metabolite analysis
-- **Genetic**: Individual response variations
-
-### Computational Models
-- **Mathematical modeling**: Force prediction
-- **Machine learning**: Pattern recognition
-- **Virtual reality**: Immersive training
-- **Telemedicine**: Remote monitoring
-
----
-
-*This experiment provides fundamental insights into muscle physiology that are essential for understanding human movement, performance, and rehabilitation.*`
+*This experiment provides fundamental insights into muscle physiology.*`
 };
 
-export default function ExperimentExplainer({ 
-  experiment, 
-  isOpen, 
-  mode, 
-  onToggle, 
-  onModeChange 
-}: ExperimentExplainerProps) {
+export default function ExperimentExplainer({ experiment, mode, onToggle, onModeChange }: ExperimentExplainerProps) {
   const [markdownText, setMarkdownText] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load markdown content when experiment changes
-  useEffect(() => {
-    if (experiment?.name) {
-      loadMarkdownContent(experiment.name);
+  // Konfiguracja marked
+  const configureMarked = useCallback(() => {
+    try {
+      marked.setOptions({
+        gfm: true,
+        breaks: true
+      });
+    } catch (error) {
+      console.error('Error configuring marked:', error);
     }
-  }, [experiment]);
+  }, []);
 
-  const loadMarkdownContent = async (experimentName: string) => {
+  const loadMarkdownContent = useCallback(async (experimentName: string) => {
     setIsLoading(true);
     try {
-      // Try to load markdown content from constants
+      // Próbuj wczytać z pliku w public/markdown/
+      const fileName = experimentName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      console.log('Trying to load markdown file:', `/markdown/${fileName}.md`);
+      
+      const response = await fetch(`/markdown/${fileName}.md`);
+      
+      if (response.ok) {
+        const content = await response.text();
+        console.log('Loaded markdown content:', content.substring(0, 100) + '...');
+        setMarkdownText(content);
+      } else {
+        console.log('Markdown file not found, using fallback content');
+        // Fallback do hardcoded content
+        const content = EXPERIMENT_MARKDOWN[experimentName];
+        if (content) {
+          setMarkdownText(content);
+        } else {
+          console.warn(`Markdown content not found for: ${experimentName}, using placeholder content`);
+          const placeholderContent = getPlaceholderContent(experimentName);
+          setMarkdownText(placeholderContent);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading markdown:', error);
+      // Fallback do hardcoded content
       const content = EXPERIMENT_MARKDOWN[experimentName];
       if (content) {
         setMarkdownText(content);
       } else {
-        // Fallback to placeholder content if not found
-        console.warn(`Markdown content not found for: ${experimentName}, using placeholder content`);
         const placeholderContent = getPlaceholderContent(experimentName);
         setMarkdownText(placeholderContent);
       }
-    } catch (error) {
-      console.error('Error loading markdown:', error);
-      // Fallback to placeholder content on error
-      const placeholderContent = getPlaceholderContent(experimentName);
-      setMarkdownText(placeholderContent);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    configureMarked();
+  }, [configureMarked]);
+
+  useEffect(() => {
+    if (experiment?.name) {
+      loadMarkdownContent(experiment.name);
+    }
+  }, [experiment, loadMarkdownContent]);
 
   const getPlaceholderContent = (experimentName: string): string => {
     switch (experimentName) {
@@ -572,7 +336,7 @@ This experiment explores the electrical properties of cardiac muscle tissue, inc
 
 *Note: This is placeholder content. The actual markdown file will be loaded dynamically.*`;
       
-      case 'Cardiomyocyte Potential':
+      case 'Cardiomyocyte Potential Template':
         return `# Cardiomyocyte Potential
 
 ## Overview
@@ -603,34 +367,61 @@ Investigate the relationship between stimulus strength and muscle contraction.
       default:
         return `# ${experimentName}
 
-## Overview
-Documentation for this experiment will be loaded from the corresponding markdown file.
+## ⚠️ Brak opisu eksperymentu
 
-## Status
-This is placeholder content. The actual markdown file will be loaded dynamically from: \`${experiment?.markdownFile}\`
+**Nie mamy jeszcze opisu dla tego eksperymentu.**
 
-*Note: Markdown files should be placed in the \`public/markdown/\` directory.*`;
+### Co to oznacza?
+- Eksperyment jest dostępny do uruchomienia
+- Dokumentacja nie została jeszcze przygotowana
+- Opis zostanie dodany w przyszłej aktualizacji
+
+### Status
+- ✅ Eksperyment: **Dostępny**
+- ❌ Dokumentacja: **W przygotowaniu**
+
+---
+
+*To jest placeholder. Prawdziwy opis eksperymentu zostanie załadowany z pliku markdown gdy będzie dostępny.*`;
     }
   };
 
-  const handleModeToggle = () => {
-    onModeChange(mode === 'side' ? 'cover' : 'side');
-  };
-
-  if (!experiment) {
-    return null;
-  }
-
-  // Convert markdown to HTML
-  const htmlContent = marked(markdownText);
+  // Konwertuj markdown na HTML z odpowiednimi klasami CSS
+  const htmlContent = useMemo(() => {
+    if (!markdownText) return '';
+    try {
+      const result = marked(markdownText);
+      console.log('Marked result type:', typeof result, 'Value:', result);
+      
+      // Upewnij się, że wynik jest stringiem
+      if (typeof result === 'string') {
+        return result;
+      } else if (result && typeof result === 'object' && 'html' in result) {
+        return String(result.html);
+      } else {
+        console.error('Unexpected marked result:', result);
+        return `<p class="text-red-600 dark:text-red-400">Error: Unexpected content format</p>`;
+      }
+    } catch (error) {
+      console.error('Error converting markdown to HTML:', error);
+      return `<p class="text-red-600 dark:text-red-400">Error loading content: ${error instanceof Error ? error.message : 'Unknown error'}</p>`;
+    }
+  }, [markdownText]);
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-gray-800">
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-        <h2 className="text-lg font-bold text-emerald-600 dark:text-emerald-300">{experiment.name}</h2>
-        <div className="hidden lg:flex items-center gap-2">
-          <button 
-            onClick={handleModeToggle}
+    <div className={`fixed top-16 right-0 h-[calc(100vh-4rem)] bg-white dark:bg-gray-800 shadow-2xl transition-all duration-300 ease-in-out z-40 ${mode === 'side' ? 'w-[32rem] lg:block' : 'w-full lg:w-[36rem]'}`}>
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {experiment?.name || 'Documentation'}
+          </h2>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          {/* Mode Toggle */}
+          <button
+            onClick={() => onModeChange(mode === 'side' ? 'cover' : 'side')}
             className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors"
             title={mode === 'cover' ? 'Switch to side-by-side mode' : 'Switch to cover mode'}
           >
@@ -644,35 +435,29 @@ This is placeholder content. The actual markdown file will be loaded dynamically
               </svg>
             )}
           </button>
-          <button 
+          
+          {/* Close Button */}
+          <button
             onClick={onToggle}
-            className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors"
-            title="Close documentation"
+            className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        <button 
-          onClick={onToggle} 
-          className="lg:hidden p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors" 
-          title="Close documentation"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
       </div>
-      
+
+      {/* Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         {isLoading ? (
-          <div className="p-4 text-center text-gray-600 dark:text-gray-400">
-            Loading documentation...
-          </div>
+          <div className="p-4 text-center text-gray-600 dark:text-gray-400">Loading documentation...</div>
         ) : (
-          <div className="p-4 prose prose-sm max-w-none dark:prose-invert">
-            <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+          <div className="p-6 prose prose-lg max-w-none prose-headings:text-gray-900 dark:prose-headings:text-gray-100 prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-strong:text-gray-900 dark:prose-strong:text-gray-100 prose-code:text-gray-900 dark:prose-code:text-gray-100 prose-code:bg-gray-100 dark:prose-code:bg-gray-700 prose-pre:bg-gray-100 dark:prose-pre:bg-gray-700 prose-pre:text-gray-900 dark:prose-pre:text-gray-100 prose-blockquote:border-gray-300 dark:prose-blockquote:border-gray-600 prose-blockquote:text-gray-700 dark:prose-blockquote:text-gray-300 prose-ul:text-gray-700 dark:prose-ul:text-gray-300 prose-ol:text-gray-700 dark:prose-ol:text-gray-300 prose-li:text-gray-700 dark:prose-li:text-gray-300 prose-hr:border-gray-300 dark:prose-hr:border-gray-600 prose-headings:font-sans prose-p:font-sans prose-strong:font-semibold prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-h4:text-lg prose-p:leading-relaxed prose-p:mb-4 prose-ul:mb-4 prose-ol:mb-4 prose-blockquote:pl-4 prose-blockquote:border-l-4 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm">
+            <div 
+              className="markdown-content"
+              dangerouslySetInnerHTML={{ __html: htmlContent }} 
+            />
           </div>
         )}
       </div>
