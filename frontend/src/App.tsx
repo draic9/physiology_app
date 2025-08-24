@@ -1,20 +1,10 @@
 import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import Login from "./pages/Login";
-import { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import React from "react";
 import ExperimentMenu from "./pages/ExperimentMenu";
 import TopNav from "./components/TopNav";
 import ExperimentScreen from "./pages/ExperimentScreen";
 import ProtectedLayout from "./components/ProtectedLayout";
-
-const techStack = [
-  { name: "React", logo: reactLogo, url: "https://react.dev" },
-  { name: "Vite", logo: viteLogo, url: "https://vite.dev" },
-  { name: "TailwindCSS", logo: "https://upload.wikimedia.org/wikipedia/commons/d/d5/Tailwind_CSS_Logo.svg", url: "https://tailwindcss.com/" },
-  { name: "Chart.js", logo: "https://www.chartjs.org/img/chartjs-logo.svg", url: "https://www.chartjs.org/" },
-  { name: "React Router", logo: "https://reactrouter.com/favicon-light.png", url: "https://reactrouter.com/" },
-];
 
 function Dashboard() {
   return (
@@ -27,7 +17,7 @@ function Dashboard() {
   );
 }
 
-function RequireAuth({ children }: { children: JSX.Element }) {
+function RequireAuth({ children }: { children: React.ReactElement }) {
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
   const location = useLocation();
   if (!isLoggedIn) {

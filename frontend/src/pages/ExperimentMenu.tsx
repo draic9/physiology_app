@@ -1,42 +1,55 @@
 import { LockClosedIcon } from '@heroicons/react/24/solid';
 import { useNavigate } from "react-router-dom";
+import type { Experiment } from '../types/experiment';
 
-const experiments = [
+const experiments: Experiment[] = [
   {
     id: 1,
     name: 'Skeletal Muscle Response',
     description: 'Explore how skeletal muscle responds to different stimuli.',
     unlocked: true,
+    markdownFile: '/markdown/skeletal-muscle.md',
+    component: 'SkeletalMuscleExperiment'
   },
   {
     id: 2,
     name: 'Nerve Conduction Velocity',
     description: 'Measure the speed of nerve impulses.',
     unlocked: false,
+    markdownFile: '/markdown/nerve-conduction.md',
+    component: 'SkeletalMuscleExperiment'
   },
   {
     id: 3,
     name: 'Cardiac Muscle Physiology',
     description: 'Investigate the properties of cardiac muscle tissue.',
     unlocked: false,
+    markdownFile: '/markdown/cardiac-muscle.md',
+    component: 'SkeletalMuscleExperiment'
   },
   {
     id: 4,
     name: 'Respiratory Gas Exchange',
     description: 'Simulate oxygen and carbon dioxide exchange in the lungs.',
     unlocked: false,
+    markdownFile: '/markdown/respiratory.md',
+    component: 'SkeletalMuscleExperiment'
   },
   {
     id: 5,
     name: 'Renal Filtration',
     description: 'Model the filtration process in the kidneys.',
     unlocked: false,
+    markdownFile: '/markdown/renal.md',
+    component: 'SkeletalMuscleExperiment'
   },
   {
     id: 6,
     name: 'Acid-Base Balance',
     description: 'Explore how the body maintains pH homeostasis.',
     unlocked: false,
+    markdownFile: '/markdown/acid-base.md',
+    component: 'SkeletalMuscleExperiment'
   },
 ];
 
