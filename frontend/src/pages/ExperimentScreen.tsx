@@ -66,7 +66,7 @@ export default function ExperimentScreen() {
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col items-center pt-10 pb-10 px-2">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col items-center pt-20 pb-10 px-2">
       <div className="w-full max-w-7xl relative">
         {/* Main Content Area */}
         <div className={`transition-all duration-300 ease-in-out ${
@@ -78,7 +78,7 @@ export default function ExperimentScreen() {
         </div>
 
         {/* Side Panel */}
-        <div className={`fixed top-0 right-0 h-full bg-white dark:bg-gray-800 shadow-2xl transition-all duration-300 ease-in-out z-40 ${
+        <div className={`fixed top-16 right-0 h-[calc(100vh-4rem)] bg-white dark:bg-gray-800 shadow-2xl transition-all duration-300 ease-in-out z-40 ${
           isPanelOpen 
             ? 'translate-x-0' 
             : 'translate-x-full'
@@ -99,7 +99,7 @@ export default function ExperimentScreen() {
         {/* Panel Toggle Button */}
         <button
           onClick={() => setIsPanelOpen(!isPanelOpen)}
-          className={`fixed top-20 right-4 z-50 p-3 rounded-full shadow-lg transition-all duration-300 ${
+          className={`fixed top-24 right-4 z-50 p-3 rounded-full shadow-lg transition-all duration-300 ${
             isPanelOpen 
               ? 'bg-emerald-500 hover:bg-emerald-600 text-white' 
               : 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
