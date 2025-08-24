@@ -135,6 +135,17 @@ Nerve conduction velocity is a measure of how fast electrical impulses travel al
             </svg>
           </button>
         </div>
+
+        {/* Mobile Close Button - Always visible on mobile */}
+        <button
+          onClick={onToggle}
+          className="lg:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors"
+          title="Close documentation"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       {/* Content Area with Scroll */}

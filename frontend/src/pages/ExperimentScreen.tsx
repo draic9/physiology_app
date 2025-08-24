@@ -55,33 +55,38 @@ export default function ExperimentScreen() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Handle panel resizing
+  // Handle panel resizing with simpler, more robust logic
   const handleResize = (e: React.MouseEvent) => {
-    if (panelMode === 'side') {
-      e.preventDefault();
-      e.stopPropagation();
+    if (panelMode !== 'side') return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const startX = e.clientX;
+    const startWidth = panelWidth;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = startX - e.clientX;
+      const pixelChange = deltaX;
+      const remChange = pixelChange / 16; // Convert pixels to rem
+      let newWidth = startWidth + remChange;
       
-      const startX = e.clientX;
-      const startWidth = panelWidth;
+      // Enforce strict bounds
+      newWidth = Math.max(20, Math.min(48, newWidth));
       
-      const handleMouseMove = (e: MouseEvent) => {
-        const deltaX = startX - e.clientX;
-        const newWidth = Math.max(20, Math.min(48, startWidth + deltaX / 16)); // Convert pixels to rem, min 20rem, max 48rem
-        
-        // Safety check: prevent going full screen
-        if (newWidth >= 20 && newWidth <= 48) {
-          setPanelWidth(newWidth);
-        }
-      };
-      
-      const handleMouseUp = () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-      
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
+      // Only update if within bounds
+      if (newWidth >= 20 && newWidth <= 48) {
+        setPanelWidth(Math.round(newWidth * 10) / 10); // Round to 1 decimal place
+      }
+    };
+    
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
 
   // Reset panel width when switching modes
@@ -132,6 +137,7 @@ export default function ExperimentScreen() {
             : 'w-full lg:w-[36rem]' // Fixed width for cover mode
         }`}>
           {/* Resize Handle - Only show in side mode */}
+          {/* FINAL ATTEMPT: If resizing still doesn't work, remove this entire resize functionality */}
           {panelMode === 'side' && (
             <div 
               className="absolute left-0 top-0 w-1 h-full bg-gray-300 dark:bg-gray-600 cursor-col-resize hover:bg-emerald-400 dark:hover:bg-emerald-500 transition-colors"
