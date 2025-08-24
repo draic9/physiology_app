@@ -71,7 +71,7 @@ export default function ExperimentScreen() {
         {/* Main Content Area */}
         <div className={`transition-all duration-300 ease-in-out ${
           isPanelOpen && panelMode === 'side' 
-            ? 'lg:mr-80' // Leave space for side panel
+            ? 'lg:mr-96' // Increased from lg:mr-80 to lg:mr-96 to match wider panel
             : ''
         }`}>
           <ExperimentWorkArea />
@@ -84,8 +84,8 @@ export default function ExperimentScreen() {
             : 'translate-x-full'
         } ${
           panelMode === 'side' 
-            ? 'w-80 lg:block' // Fixed width for side mode
-            : 'w-full lg:w-96' // Full width on mobile, smaller on desktop for cover mode
+            ? 'w-96 lg:block' // Increased from w-80 to w-96 (384px)
+            : 'w-full lg:w-[28rem]' // Increased from w-96 to w-[28rem] (448px) for cover mode
         }`}>
           <ExperimentExplainer 
             experiment={experiment}
@@ -96,13 +96,13 @@ export default function ExperimentScreen() {
           />
         </div>
 
-        {/* Panel Toggle Button */}
+        {/* Panel Toggle Button - Smart positioning */}
         <button
           onClick={() => setIsPanelOpen(!isPanelOpen)}
-          className={`fixed top-24 right-4 z-50 p-3 rounded-full shadow-lg transition-all duration-300 ${
+          className={`fixed top-24 z-50 p-3 rounded-full shadow-lg transition-all duration-300 ${
             isPanelOpen 
-              ? 'bg-emerald-500 hover:bg-emerald-600 text-white' 
-              : 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+              ? 'bg-emerald-500 hover:bg-emerald-600 text-white right-[calc(24rem+1rem)]' // Position to the left of panel when open
+              : 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 right-4' // Default position
           }`}
           aria-label={isPanelOpen ? 'Close documentation' : 'Open documentation'}
         >
