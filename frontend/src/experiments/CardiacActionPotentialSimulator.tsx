@@ -1,4 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
+import { 
+  PlayIcon, 
+  PauseIcon, 
+  ArrowPathIcon, 
+  Cog6ToothIcon, 
+  BoltIcon, 
+  InformationCircleIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  HeartIcon
+} from '@heroicons/react/24/outline';
 import type { ExperimentData, ExperimentResult } from '../types/experiment';
 
 interface CardiacActionPotentialSimulatorProps {
@@ -25,7 +36,7 @@ const CardiacActionPotentialSimulator = ({
   const [stimulationRate, setStimulationRate] = useState(1); // Hz
   const [simulationSpeed, setSimulationSpeed] = useState(1); // 1x real time
   const [pharmacologyCollapsed, setPharmacologyCollapsed] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<number | null>(null);
   const lastStimulus = useRef(0);
 
   // Parametry podstawowe z dokumentu
@@ -111,7 +122,7 @@ const CardiacActionPotentialSimulator = ({
   // Symulacja z uwzględnieniem prędkości
   useEffect(() => {
     if (isRunning) {
-      intervalRef.current = setInterval(() => {
+      intervalRef.current = window.setInterval(() => {
         setTime(prevTime => {
           const newTime = prevTime + simulationSpeed;
           const cycleDuration = 1000 / stimulationRate;
@@ -141,7 +152,7 @@ const CardiacActionPotentialSimulator = ({
   }, [isRunning, stimulationRate, cellType, drugs, simulationSpeed]);
 
   const handleReset = () => {
-    setIsRunning(false);
+    onRun(); // This will stop the simulation via parent
     setTime(0);
     setData([]);
   };
@@ -173,59 +184,75 @@ const CardiacActionPotentialSimulator = ({
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-4 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-      <div className="mb-6 text-center">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-2">
-          ❤️ Symulator Potencjału Czynnościowego Kardiomiocytów
+    <div className="flex flex-col gap-6">
+      {/* Header */}
+      <div className="text-center mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2 flex items-center justify-center gap-2">
+          <HeartIcon className="h-8 w-8 text-red-500" />
+          Symulator Potencjału Czynnościowego Kardiomiocytów
         </h1>
-        <p className="text-gray-600 text-sm md:text-base">Interaktywny model wpływu leków na przewodnictwo elektryczne serca</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
+          Interaktywny model wpływu leków na przewodnictwo elektryczne serca
+        </p>
       </div>
 
       {/* Desktop: 2-column grid, Mobile: 1-column */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Simulation Control Card - 1 column width */}
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            ⚙️ Kontrola Symulacji
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700 dark:text-gray-200">
+            <Cog6ToothIcon className="h-5 w-5 text-emerald-500" />
+            Kontrola Symulacji
           </h3>
           
           <div className="space-y-4">
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <button
-                onClick={() => setIsRunning(!isRunning)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium ${
+                onClick={onRun}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-colors ${
                   isRunning 
                     ? 'bg-red-500 hover:bg-red-600 text-white' 
-                    : 'bg-green-500 hover:bg-green-600 text-white'
+                    : 'bg-emerald-500 hover:bg-emerald-600 text-white'
                 }`}
               >
-                {isRunning ? '⏸️ Zatrzymaj' : '▶️ Start'}
+                {isRunning ? (
+                  <>
+                    <PauseIcon className="h-4 w-4" />
+                    Zatrzymaj
+                  </>
+                ) : (
+                  <>
+                    <PlayIcon className="h-4 w-4" />
+                    Start
+                  </>
+                )}
               </button>
               
               <button
                 onClick={handleReset}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md font-medium"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md font-medium transition-colors"
               >
-                🔄 Reset
+                <ArrowPathIcon className="h-4 w-4" />
+                Reset
               </button>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Typ komórki:</label>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Typ komórki:</label>
               <select
                 value={cellType}
                 onChange={(e) => setCellType(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 <option value="ventricular">Komorowa (-90mV)</option>
                 <option value="atrial">Przedsionkowa (-80mV)</option>
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                   Częstotliwość: {stimulationRate} Hz
                 </label>
                 <input
@@ -235,11 +262,11 @@ const CardiacActionPotentialSimulator = ({
                   step="0.1"
                   value={stimulationRate}
                   onChange={(e) => setStimulationRate(parseFloat(e.target.value))}
-                  className="w-full"
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                   Prędkość: {simulationSpeed}x
                 </label>
                 <input
@@ -249,7 +276,7 @@ const CardiacActionPotentialSimulator = ({
                   step="0.1"
                   value={simulationSpeed}
                   onChange={(e) => setSimulationSpeed(parseFloat(e.target.value))}
-                  className="w-full"
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
                 />
               </div>
             </div>
@@ -257,42 +284,45 @@ const CardiacActionPotentialSimulator = ({
         </div>
 
         {/* Simulation Status Card - 1 column width */}
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            ⚡ Status Aktualny
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700 dark:text-gray-200">
+            <BoltIcon className={`h-5 w-5 ${isStimulated ? 'text-yellow-500' : 'text-gray-400'}`} />
+            Status Aktualny
           </h3>
           
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="font-medium">Potencjał błonowy:</span>
-              <span className={`font-bold ${currentVoltage > 0 ? 'text-red-600' : 'text-blue-600'}`}>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Potencjał błonowy:</span>
+              <span className={`font-bold text-lg ${currentVoltage > 0 ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
                 {currentVoltage.toFixed(1)} mV
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="font-medium">Czas:</span>
-              <span>{(time / 1000).toFixed(2)} s</span>
+            <div className="flex justify-between items-center">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Czas:</span>
+              <span className="text-gray-900 dark:text-gray-100">{(time / 1000).toFixed(2)} s</span>
             </div>
-            <div className="flex justify-between">
-              <span className="font-medium">Stymulacja:</span>
-              <span className={`font-bold ${isStimulated ? 'text-green-600' : 'text-gray-600'}`}>
+            <div className="flex justify-between items-center">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Stymulacja:</span>
+              <span className={`font-bold ${isStimulated ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-600 dark:text-gray-400'}`}>
                 {isStimulated ? 'AKTYWNA' : 'nieaktywna'}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="font-medium">Aktualna faza:</span>
-              <span className="font-bold text-purple-600 text-sm">{getCurrentPhase()}</span>
+            <div className="flex justify-between items-center">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Aktualna faza:</span>
+              <span className="font-bold text-purple-600 dark:text-purple-400 text-sm">{getCurrentPhase()}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="font-medium">Typ komórki:</span>
-              <span className="capitalize">{cellType === 'ventricular' ? 'Komorowa' : 'Przedsionkowa'}</span>
+            <div className="flex justify-between items-center">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Typ komórki:</span>
+              <span className="capitalize text-gray-900 dark:text-gray-100">{cellType === 'ventricular' ? 'Komorowa' : 'Przedsionkowa'}</span>
             </div>
           </div>
         </div>
 
         {/* Chart Card - 2 columns width */}
-        <div className="lg:col-span-2 bg-white p-4 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold mb-3">📈 Potencjał czynnościowy w czasie rzeczywistym</h3>
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-200">
+            📈 Potencjał czynnościowy w czasie rzeczywistym
+          </h3>
           
           <div className="h-64 md:h-96 w-full">
             <svg width="100%" height="100%" viewBox="0 0 800 300">
@@ -384,74 +414,75 @@ const CardiacActionPotentialSimulator = ({
           <div className="mt-4 flex flex-wrap gap-4 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-gradient-to-r from-red-500 to-blue-600 rounded"></div>
-              <span>Potencjał błonowy</span>
+              <span className="text-gray-700 dark:text-gray-300">Potencjał błonowy</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-yellow-400 rounded-full border border-yellow-500"></div>
-              <span>Stymulacja elektryczna</span>
+              <span className="text-gray-700 dark:text-gray-300">Stymulacja elektryczna</span>
             </div>
           </div>
         </div>
 
         {/* Chart Info Panel - 2 columns width */}
-        <div className="lg:col-span-2 bg-white p-4 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            ℹ️ Informacje o bieżącym wykresie
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700 dark:text-gray-200">
+            <InformationCircleIcon className="h-5 w-5 text-emerald-500" />
+            Informacje o bieżącym wykresie
           </h3>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {/* Simulation Stats */}
-            <div className="bg-blue-50 p-3 rounded-lg text-center">
-              <div className="text-2xl font-bold text-blue-600">{data.length}</div>
-              <div className="text-xs text-gray-600">Punkty danych</div>
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-center">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{data.length}</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Punkty danych</div>
             </div>
             
-            <div className="bg-green-50 p-3 rounded-lg text-center">
-              <div className="text-2xl font-bold text-green-600">{simulationSpeed}x</div>
-              <div className="text-xs text-gray-600">Prędkość</div>
+            <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg text-center">
+              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{simulationSpeed}x</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Prędkość</div>
             </div>
             
-            <div className="bg-purple-50 p-3 rounded-lg text-center">
-              <div className="text-2xl font-bold text-purple-600">{(time / 1000).toFixed(1)}s</div>
-              <div className="text-xs text-gray-600">Czas symulacji</div>
+            <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg text-center">
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{(time / 1000).toFixed(1)}s</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Czas symulacji</div>
             </div>
             
             {/* Signal Analysis */}
-            <div className="bg-red-50 p-3 rounded-lg text-center">
-              <div className="text-2xl font-bold text-red-600">
+            <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg text-center">
+              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
                 {data.length > 0 ? Math.min(...data.slice(-100).map(d => d.voltage)).toFixed(0) : '-'}
               </div>
-              <div className="text-xs text-gray-600">Min. potencjał (mV)</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Min. potencjał (mV)</div>
             </div>
             
-            <div className="bg-orange-50 p-3 rounded-lg text-center">
-              <div className="text-2xl font-bold text-orange-600">
+            <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg text-center">
+              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                 {data.length > 0 ? Math.max(...data.slice(-100).map(d => d.voltage)).toFixed(0) : '-'}
               </div>
-              <div className="text-xs text-gray-600">Max. potencjał (mV)</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Max. potencjał (mV)</div>
             </div>
             
-            <div className="bg-indigo-50 p-3 rounded-lg text-center">
-              <div className="text-2xl font-bold text-indigo-600">
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg text-center">
+              <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                 {data.length > 0 ? (Math.max(...data.slice(-100).map(d => d.voltage)) - Math.min(...data.slice(-100).map(d => d.voltage))).toFixed(0) : '-'}
               </div>
-              <div className="text-xs text-gray-600">Amplituda (mV)</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Amplituda (mV)</div>
             </div>
           </div>
           
           {/* Active Drugs Row */}
-          <div className="mt-4 pt-3 border-t border-gray-200">
-            <h4 className="text-sm font-semibold text-gray-700 mb-2">Aktywne leki:</h4>
+          <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Aktywne leki:</h4>
             <div className="flex flex-wrap gap-2">
               {Object.entries(drugs).map(([drugName, drug]) => (
                 drug.active && (
-                  <div key={drugName} className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                  <div key={drugName} className="bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 px-3 py-1 rounded-full text-sm font-medium">
                     {drugName}: {drug.concentration} μM
                   </div>
                 )
               ))}
               {!Object.values(drugs).some(drug => drug.active) && (
-                <div className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm">
+                <div className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-full text-sm">
                   Brak aktywnych leków
                 </div>
               )}
@@ -460,25 +491,29 @@ const CardiacActionPotentialSimulator = ({
         </div>
 
         {/* Pharmacology Panel - 1 column width, collapsible */}
-        <div className="bg-white p-4 rounded-lg shadow-md">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
           <div 
-            className="flex items-center justify-between cursor-pointer mb-3"
+            className="flex items-center justify-between cursor-pointer mb-4"
             onClick={() => setPharmacologyCollapsed(!pharmacologyCollapsed)}
           >
-            <h3 className="text-lg font-semibold flex items-center gap-2">
+            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-700 dark:text-gray-200">
               💊 Farmakologia
             </h3>
-            {pharmacologyCollapsed ? '▼' : '▲'}
+            {pharmacologyCollapsed ? (
+              <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+            ) : (
+              <ChevronUpIcon className="h-5 w-5 text-gray-500" />
+            )}
           </div>
           
           {!pharmacologyCollapsed && (
             <div className="space-y-4">
-              <p className="text-sm text-gray-600 mb-4">Wpływ leków na kanały jonowe</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Wpływ leków na kanały jonowe</p>
               
               {/* TTX */}
-              <div className="border border-gray-200 p-3 rounded-md">
+              <div className="border border-gray-200 dark:border-gray-600 p-3 rounded-md">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="font-medium text-red-600 text-sm">Tetrodotoksyna (TTX)</label>
+                  <label className="font-medium text-red-600 dark:text-red-400 text-sm">Tetrodotoksyna (TTX)</label>
                   <input
                     type="checkbox"
                     checked={drugs.TTX.active}
@@ -486,9 +521,9 @@ const CardiacActionPotentialSimulator = ({
                     className="scale-110"
                   />
                 </div>
-                <p className="text-xs text-gray-600 mb-2">Blokuje kanały Na+, zmniejsza szybkość depolaryzacji (Faza 0)</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Blokuje kanały Na+, zmniejsza szybkość depolaryzacji (Faza 0)</p>
                 <div>
-                  <label className="block text-xs mb-1">Stężenie (μM):</label>
+                  <label className="block text-xs mb-1 text-gray-700 dark:text-gray-300">Stężenie (μM):</label>
                   <input
                     type="number"
                     min="0"
@@ -497,15 +532,15 @@ const CardiacActionPotentialSimulator = ({
                     value={drugs.TTX.concentration}
                     onChange={(e) => handleDrugChange('TTX', 'concentration', e.target.value)}
                     disabled={!drugs.TTX.active}
-                    className="w-full p-1 text-sm border border-gray-300 rounded"
+                    className="w-full p-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
               </div>
 
               {/* Verapamil */}
-              <div className="border border-gray-200 p-3 rounded-md">
+              <div className="border border-gray-200 dark:border-gray-600 p-3 rounded-md">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="font-medium text-purple-600 text-sm">Werapamil</label>
+                  <label className="font-medium text-purple-600 dark:text-purple-400 text-sm">Werapamil</label>
                   <input
                     type="checkbox"
                     checked={drugs.verapamil.active}
@@ -513,9 +548,9 @@ const CardiacActionPotentialSimulator = ({
                     className="scale-110"
                   />
                 </div>
-                <p className="text-xs text-gray-600 mb-2">Blokuje kanały L-Ca2+, skraca plateau (Faza 2)</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Blokuje kanały L-Ca2+, skraca plateau (Faza 2)</p>
                 <div>
-                  <label className="block text-xs mb-1">Stężenie (μM):</label>
+                  <label className="block text-xs mb-1 text-gray-700 dark:text-gray-300">Stężenie (μM):</label>
                   <input
                     type="number"
                     min="0"
@@ -524,15 +559,15 @@ const CardiacActionPotentialSimulator = ({
                     value={drugs.verapamil.concentration}
                     onChange={(e) => handleDrugChange('verapamil', 'concentration', e.target.value)}
                     disabled={!drugs.verapamil.active}
-                    className="w-full p-1 text-sm border border-gray-300 rounded"
+                    className="w-full p-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
               </div>
 
               {/* Diltiazem */}
-              <div className="border border-gray-200 p-3 rounded-md">
+              <div className="border border-gray-200 dark:border-gray-600 p-3 rounded-md">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="font-medium text-green-600 text-sm">Diltiazem</label>
+                  <label className="font-medium text-emerald-600 dark:text-emerald-400 text-sm">Diltiazem</label>
                   <input
                     type="checkbox"
                     checked={drugs.diltiazem.active}
@@ -540,9 +575,9 @@ const CardiacActionPotentialSimulator = ({
                     className="scale-110"
                   />
                 </div>
-                <p className="text-xs text-gray-600 mb-2">Blokuje kanały L-Ca2+, podobnie do werapamilu</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Blokuje kanały L-Ca2+, podobnie do werapamilu</p>
                 <div>
-                  <label className="block text-xs mb-1">Stężenie (μM):</label>
+                  <label className="block text-xs mb-1 text-gray-700 dark:text-gray-300">Stężenie (μM):</label>
                   <input
                     type="number"
                     min="0"
@@ -551,7 +586,7 @@ const CardiacActionPotentialSimulator = ({
                     value={drugs.diltiazem.concentration}
                     onChange={(e) => handleDrugChange('diltiazem', 'concentration', e.target.value)}
                     disabled={!drugs.diltiazem.active}
-                    className="w-full p-1 text-sm border border-gray-300 rounded"
+                    className="w-full p-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
               </div>
@@ -560,28 +595,28 @@ const CardiacActionPotentialSimulator = ({
         </div>
 
         {/* Phases Info Panel - 1 column width */}
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold mb-3">📚 Fazy potencjału czynnościowego</h3>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-200">📚 Fazy potencjału czynnościowego</h3>
           <div className="space-y-3 text-sm">
             <div className="border-l-4 border-red-500 pl-3">
-              <h4 className="font-semibold text-red-600">Faza 0</h4>
-              <p className="text-gray-600">Depolaryzacja Na⁺<br/>Nadstrzał do +35mV</p>
+              <h4 className="font-semibold text-red-600 dark:text-red-400">Faza 0</h4>
+              <p className="text-gray-600 dark:text-gray-400">Depolaryzacja Na⁺<br/>Nadstrzał do +35mV</p>
             </div>
             <div className="border-l-4 border-orange-500 pl-3">
-              <h4 className="font-semibold text-orange-600">Faza 1</h4>
-              <p className="text-gray-600">Wstępna repolaryzacja K⁺<br/>Spadek potencjału</p>
+              <h4 className="font-semibold text-orange-600 dark:text-orange-400">Faza 1</h4>
+              <p className="text-gray-600 dark:text-gray-400">Wstępna repolaryzacja K⁺<br/>Spadek potencjału</p>
             </div>
             <div className="border-l-4 border-blue-500 pl-3">
-              <h4 className="font-semibold text-blue-600">Faza 2</h4>
-              <p className="text-gray-600">Plateau Ca²⁺<br/>Kanały L-type</p>
+              <h4 className="font-semibold text-blue-600 dark:text-blue-400">Faza 2</h4>
+              <p className="text-gray-600 dark:text-gray-400">Plateau Ca²⁺<br/>Kanały L-type</p>
             </div>
-            <div className="border-l-4 border-green-500 pl-3">
-              <h4 className="font-semibold text-green-600">Faza 3</h4>
-              <p className="text-gray-600">Repolaryzacja K⁺<br/>Powrót do spoczynku</p>
+            <div className="border-l-4 border-emerald-500 pl-3">
+              <h4 className="font-semibold text-emerald-600 dark:text-emerald-400">Faza 3</h4>
+              <p className="text-gray-600 dark:text-gray-400">Repolaryzacja K⁺<br/>Powrót do spoczynku</p>
             </div>
             <div className="border-l-4 border-gray-500 pl-3">
-              <h4 className="font-semibold text-gray-600">Faza 4</h4>
-              <p className="text-gray-600">Potencjał spoczynkowy<br/>-90mV (komorowe)</p>
+              <h4 className="font-semibold text-gray-600 dark:text-gray-400">Faza 4</h4>
+              <p className="text-gray-600 dark:text-gray-400">Potencjał spoczynkowy<br/>-90mV (komorowe)</p>
             </div>
           </div>
         </div>
