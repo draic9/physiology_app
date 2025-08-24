@@ -1,60 +1,59 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import type { Experiment, ExperimentData, ExperimentResult } from '../types/experiment';
-import SkeletalMuscleExperiment from '../experiments/SkeletalMuscleExperiment';
 
-// Map of experiment components
-const experimentComponents: Record<string, React.ComponentType<{
-  onDataChange: (data: ExperimentData) => void;
-  onRun: () => void;
-  results: ExperimentResult | null;
-  isRunning: boolean;
-}>> = {
-  'SkeletalMuscleExperiment': SkeletalMuscleExperiment,
-  // Add more experiments here as they're created
-};
+interface ExperimentWorkAreaProps {
+  experimentComponents: Record<string, React.ComponentType<{
+    onDataChange: (data: ExperimentData) => void;
+    onRun: () => void;
+    results: ExperimentResult | null;
+    isRunning: boolean;
+  }>>;
+  experimentConfigs: Record<number, Experiment>;
+  onExperimentChange?: (experiment: Experiment | null) => void;
+}
 
-// Map of experiment configurations
-const experimentConfigs: Record<number, Experiment> = {
-  1: {
-    id: 1,
-    name: 'Skeletal Muscle Response',
-    description: 'Explore how skeletal muscle responds to different stimuli.',
-    unlocked: true,
-    markdownFile: '/markdown/skeletal-muscle.md',
-    component: 'SkeletalMuscleExperiment'
-  },
-  2: {
-    id: 2,
-    name: 'Nerve Conduction Velocity',
-    description: 'Measure the speed of nerve impulses.',
-    unlocked: false,
-    markdownFile: '/markdown/nerve-conduction.md',
-    component: 'SkeletalMuscleExperiment' // Placeholder for now
-  },
-  // Add more experiments here
-};
-
-export default function ExperimentWorkArea() {
+export default function ExperimentWorkArea({ 
+  experimentComponents, 
+  experimentConfigs, 
+  onExperimentChange 
+}: ExperimentWorkAreaProps) {
   const { id } = useParams<{ id: string }>();
   const [experiment, setExperiment] = useState<Experiment | null>(null);
   const [experimentData, setExperimentData] = useState<ExperimentData>({
     stimulus: 5,
     frequency: 20,
     duration: 100,
+    // Cardiac-specific parameters
+    drugConcentration: 0,
+    drugType: 'none',
+    temperature: 37,
+    extracellularK: 5.4,
+    extracellularCa: 2.5,
+    // Additional cardiac parameters
+    cellType: 'ventricular',
+    conductionPath: 'normal',
   });
   const [results, setResults] = useState<ExperimentResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
     if (id) {
-      const expId = parseInt(id);
-      const exp = experimentConfigs[expId];
-      if (exp) {
-        setExperiment(exp);
+      const experimentId = parseInt(id);
+      const foundExperiment = experimentConfigs[experimentId];
+      if (foundExperiment) {
+        setExperiment(foundExperiment);
+        if (onExperimentChange) {
+          onExperimentChange(foundExperiment);
+        }
+      } else {
+        setExperiment(null);
+        if (onExperimentChange) {
+          onExperimentChange(null);
+        }
       }
     }
-  }, [id]);
+  }, [id, experimentConfigs, onExperimentChange]);
 
   const handleDataChange = (data: ExperimentData) => {
     setExperimentData(data);
@@ -62,14 +61,40 @@ export default function ExperimentWorkArea() {
 
   const handleRun = async () => {
     setIsRunning(true);
-    // Simulate experiment running
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Mock results - this will be replaced with actual backend calculations
-    setResults({
-      data: [Math.random() * 100, Math.random() * 100, Math.random() * 100],
-      labels: ['Trial 1', 'Trial 2', 'Trial 3']
-    });
+    if (experiment && experiment.component === 'CardiacMuscleExperiment') {
+      setResults({
+        data: [Math.random() * 100, Math.random() * 100, Math.random() * 100],
+        labels: ['Phase 0', 'Phase 2', 'Phase 3'],
+        actionPotential: {
+          time: [0, 1, 2, 3, 4, 5],
+          voltage: [-90, 35, 10, 10, -90, -90],
+          phases: {
+            phase0: { start: 0, end: 2, peak: 35 },
+            phase1: { start: 2, end: 7, min: 10 },
+            phase2: { start: 7, end: 200, plateau: 10 },
+            phase3: { start: 200, end: 300, slope: -0.5 },
+            phase4: { start: 300, end: 1000, resting: -90 }
+          }
+        },
+        drugEffects: {
+          naInhibition: experimentData.drugType === 'TTX' ? (experimentData.drugConcentration || 0) * 10 : 0,
+          caInhibition: experimentData.drugType === 'verapamil' ? (experimentData.drugConcentration || 0) * 5 : 0
+        },
+        conductionTimes: {
+          SA_AV: 150, // ms - normal AV delay
+          AV_His: 50, // ms - His bundle conduction
+          His_Purkinje: 30, // ms - Purkinje fiber conduction
+          total: 230 // ms - total conduction time
+        }
+      });
+    } else {
+      setResults({
+        data: [Math.random() * 100, Math.random() * 100, Math.random() * 100],
+        labels: ['Trial 1', 'Trial 2', 'Trial 3']
+      });
+    }
     setIsRunning(false);
   };
 

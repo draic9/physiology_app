@@ -5,52 +5,164 @@ import type { Experiment } from '../types/experiment';
 const experiments: Experiment[] = [
   {
     id: 1,
-    name: 'Skeletal Muscle Response',
-    description: 'Explore how skeletal muscle responds to different stimuli.',
+    name: 'Cardiac Action Potential Simulator',
+    description: 'Advanced real-time cardiac electrophysiology simulator with drug effects and interactive visualization.',
     unlocked: true,
-    markdownFile: '/markdown/skeletal-muscle.md',
-    component: 'SkeletalMuscleExperiment'
+    markdownFile: '/markdown/cardiac-action-potential-simulator.md',
+    component: 'CardiacActionPotentialSimulator'
   },
   {
     id: 2,
-    name: 'Nerve Conduction Velocity',
-    description: 'Measure the speed of nerve impulses.',
-    unlocked: false,
-    markdownFile: '/markdown/nerve-conduction.md',
-    component: 'SkeletalMuscleExperiment'
+    name: 'Cardiac Muscle Physiology',
+    description: 'The first attempt at creating the experiment.',
+    unlocked: true,
+    markdownFile: '/markdown/cardiac-muscle.md',
+    component: 'CardiacMuscleExperiment'
   },
   {
     id: 3,
-    name: 'Cardiac Muscle Physiology',
-    description: 'Investigate the properties of cardiac muscle tissue.',
-    unlocked: false,
-    markdownFile: '/markdown/cardiac-muscle.md',
-    component: 'SkeletalMuscleExperiment'
+    name: 'Cardiomyocyte Potential Template',
+    description: 'A blank canvas for another attempt at making the experiment.',
+    unlocked: true,
+    markdownFile: '/markdown/cardiomyocyte-potential.md',
+    component: 'CardiomyocytePotentialExperiment'
   },
   {
     id: 4,
-    name: 'Respiratory Gas Exchange',
-    description: 'Simulate oxygen and carbon dioxide exchange in the lungs.',
+    name: 'Nerve Conduction Velocity',
+    description: 'Measure the speed of nerve impulse propagation through myelinated and unmyelinated fibers.',
     unlocked: false,
-    markdownFile: '/markdown/respiratory.md',
-    component: 'SkeletalMuscleExperiment'
+    markdownFile: '/markdown/nerve-conduction.md',
+    component: 'NerveConductionExperiment'
   },
   {
     id: 5,
-    name: 'Renal Filtration',
-    description: 'Model the filtration process in the kidneys.',
+    name: 'Synaptic Transmission',
+    description: 'Study neurotransmitter release and postsynaptic responses in chemical synapses.',
     unlocked: false,
-    markdownFile: '/markdown/renal.md',
-    component: 'SkeletalMuscleExperiment'
+    markdownFile: '/markdown/synaptic-transmission.md',
+    component: 'SynapticTransmissionExperiment'
   },
   {
     id: 6,
-    name: 'Acid-Base Balance',
-    description: 'Explore how the body maintains pH homeostasis.',
+    name: 'Respiratory Gas Exchange',
+    description: 'Simulate oxygen and carbon dioxide exchange in pulmonary capillaries.',
     unlocked: false,
-    markdownFile: '/markdown/acid-base.md',
-    component: 'SkeletalMuscleExperiment'
+    markdownFile: '/markdown/respiratory-gas-exchange.md',
+    component: 'RespiratoryExperiment'
   },
+  {
+    id: 7,
+    name: 'Renal Filtration',
+    description: 'Model glomerular filtration and tubular reabsorption processes.',
+    unlocked: false,
+    markdownFile: '/markdown/renal-filtration.md',
+    component: 'RenalExperiment'
+  },
+  {
+    id: 8,
+    name: 'Acid-Base Balance',
+    description: 'Explore pH regulation through respiratory and renal compensation mechanisms.',
+    unlocked: false,
+    markdownFile: '/markdown/acid-base-balance.md',
+    component: 'AcidBaseExperiment'
+  },
+  {
+    id: 9,
+    name: 'Blood Pressure Regulation',
+    description: 'Study baroreceptor reflexes and autonomic nervous system control.',
+    unlocked: false,
+    markdownFile: '/markdown/blood-pressure-regulation.md',
+    component: 'BloodPressureExperiment'
+  },
+  {
+    id: 10,
+    name: 'Cardiac Output',
+    description: 'Model stroke volume, heart rate, and their relationship to cardiac output.',
+    unlocked: false,
+    markdownFile: '/markdown/cardiac-output.md',
+    component: 'CardiacOutputExperiment'
+  },
+  {
+    id: 11,
+    name: 'Ventilation-Perfusion Ratio',
+    description: 'Analyze the relationship between alveolar ventilation and pulmonary blood flow.',
+    unlocked: false,
+    markdownFile: '/markdown/ventilation-perfusion.md',
+    component: 'VentilationPerfusionExperiment'
+  },
+  {
+    id: 12,
+    name: 'Glucose Metabolism',
+    description: 'Study insulin and glucagon effects on glucose uptake and storage.',
+    unlocked: false,
+    markdownFile: '/markdown/glucose-metabolism.md',
+    component: 'GlucoseMetabolismExperiment'
+  },
+  {
+    id: 13,
+    name: 'Electrolyte Balance',
+    description: 'Model sodium, potassium, and calcium homeostasis in the body.',
+    unlocked: false,
+    markdownFile: '/markdown/electrolyte-balance.md',
+    component: 'ElectrolyteExperiment'
+  },
+  {
+    id: 14,
+    name: 'Hemoglobin-Oxygen Binding',
+    description: 'Study oxygen-hemoglobin dissociation curve and factors affecting it.',
+    unlocked: false,
+    markdownFile: '/markdown/hemoglobin-oxygen.md',
+    component: 'HemoglobinExperiment'
+  },
+  {
+    id: 15,
+    name: 'Muscle Fatigue',
+    description: 'Investigate metabolic and neural factors contributing to muscle fatigue.',
+    unlocked: false,
+    markdownFile: '/markdown/muscle-fatigue.md',
+    component: 'MuscleFatigueExperiment'
+  },
+  {
+    id: 16,
+    name: 'Thermoregulation',
+    description: 'Model body temperature regulation through heat production and loss.',
+    unlocked: false,
+    markdownFile: '/markdown/thermoregulation.md',
+    component: 'ThermoregulationExperiment'
+  },
+  {
+    id: 17,
+    name: 'Endocrine Feedback Loops',
+    description: 'Study hormone regulation through negative and positive feedback mechanisms.',
+    unlocked: false,
+    markdownFile: '/markdown/endocrine-feedback.md',
+    component: 'EndocrineExperiment'
+  },
+  {
+    id: 18,
+    name: 'Immune Response',
+    description: 'Model innate and adaptive immune responses to pathogens.',
+    unlocked: false,
+    markdownFile: '/markdown/immune-response.md',
+    component: 'ImmuneExperiment'
+  },
+  {
+    id: 19,
+    name: 'Digestive Enzyme Kinetics',
+    description: 'Study enzyme-substrate interactions in the digestive system.',
+    unlocked: false,
+    markdownFile: '/markdown/digestive-enzymes.md',
+    component: 'DigestiveExperiment'
+  },
+  {
+    id: 20,
+    name: 'Neural Plasticity',
+    description: 'Investigate synaptic strength changes and learning mechanisms.',
+    unlocked: false,
+    markdownFile: '/markdown/neural-plasticity.md',
+    component: 'NeuralPlasticityExperiment'
+  }
 ];
 
 export default function ExperimentMenu() {

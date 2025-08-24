@@ -1,28 +1,198 @@
-import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import type { Experiment } from '../types/experiment';
 import ExperimentWorkArea from '../components/ExperimentWorkArea';
 import ExperimentExplainer from '../components/ExperimentExplainer';
-import type { Experiment } from '../types/experiment';
+import CardiacActionPotentialSimulator from '../experiments/CardiacActionPotentialSimulator';
+import CardiacMuscleExperiment from '../experiments/CardiacMuscleExperiment';
+import CardiomyocytePotentialExperiment from '../experiments/CardiomyocytePotentialExperiment';
 
-// Map of experiment configurations - this should eventually come from the backend
+// Component mapping for experiments
+const experimentComponents: Record<string, React.ComponentType<any>> = {
+  'CardiacActionPotentialSimulator': CardiacActionPotentialSimulator,
+  'CardiacMuscleExperiment': CardiacMuscleExperiment,
+  'CardiomyocytePotentialExperiment': CardiomyocytePotentialExperiment,
+  'NerveConductionExperiment': () => <div>Loading Nerve Conduction Experiment...</div>,
+  'SynapticTransmissionExperiment': () => <div>Loading Synaptic Transmission Experiment...</div>,
+  'RespiratoryExperiment': () => <div>Loading Respiratory Gas Exchange Experiment...</div>,
+  'RenalExperiment': () => <div>Loading Renal Filtration Experiment...</div>,
+  'AcidBaseExperiment': () => <div>Loading Acid-Base Balance Experiment...</div>,
+  'BloodPressureExperiment': () => <div>Loading Blood Pressure Regulation Experiment...</div>,
+  'CardiacOutputExperiment': () => <div>Loading Cardiac Output Experiment...</div>,
+  'VentilationPerfusionExperiment': () => <div>Loading Ventilation-Perfusion Ratio Experiment...</div>,
+  'GlucoseMetabolismExperiment': () => <div>Loading Glucose Metabolism Experiment...</div>,
+  'ElectrolyteExperiment': () => <div>Loading Electrolyte Balance Experiment...</div>,
+  'HemoglobinExperiment': () => <div>Loading Hemoglobin-Oxygen Binding Experiment...</div>,
+  'MuscleFatigueExperiment': () => <div>Loading Muscle Fatigue Experiment...</div>,
+  'ThermoregulationExperiment': () => <div>Loading Thermoregulation Experiment...</div>,
+  'EndocrineExperiment': () => <div>Loading Endocrine Feedback Loops Experiment...</div>,
+  'ImmuneExperiment': () => <div>Loading Immune Response Experiment...</div>,
+  'DigestiveExperiment': () => <div>Loading Digestive Enzyme Kinetics Experiment...</div>,
+  'NeuralPlasticityExperiment': () => <div>Loading Neural Plasticity Experiment...</div>,
+};
+
+// Experiment configurations - this should eventually come from the backend
 const experimentConfigs: Record<number, Experiment> = {
   1: {
     id: 1,
-    name: 'Skeletal Muscle Response',
-    description: 'Explore how skeletal muscle responds to different stimuli.',
+    name: 'Cardiac Action Potential Simulator',
+    description: 'Advanced real-time cardiac electrophysiology simulator with drug effects and interactive visualization.',
     unlocked: true,
-    markdownFile: '/markdown/skeletal-muscle.md',
-    component: 'SkeletalMuscleExperiment'
+    markdownFile: '/markdown/cardiac-action-potential-simulator.md',
+    component: 'CardiacActionPotentialSimulator'
   },
   2: {
     id: 2,
+    name: 'Cardiac Muscle Physiology',
+    description: 'The first attempt at creating the experiment.',
+    unlocked: true,
+    markdownFile: '/markdown/cardiac-muscle.md',
+    component: 'CardiacMuscleExperiment'
+  },
+  3: {
+    id: 3,
+    name: 'Cardiomyocyte Potential Template',
+    description: 'A blank canvas for another attempt at making the experiment.',
+    unlocked: true,
+    markdownFile: '/markdown/cardiomyocyte-potential.md',
+    component: 'CardiomyocytePotentialExperiment'
+  },
+  4: {
+    id: 4,
     name: 'Nerve Conduction Velocity',
-    description: 'Measure the speed of nerve impulses.',
+    description: 'Measure the speed of nerve impulse propagation through myelinated and unmyelinated fibers.',
     unlocked: false,
     markdownFile: '/markdown/nerve-conduction.md',
-    component: 'SkeletalMuscleExperiment' // Placeholder for now
+    component: 'NerveConductionExperiment'
   },
-  // Add more experiments here
+  5: {
+    id: 5,
+    name: 'Synaptic Transmission',
+    description: 'Study neurotransmitter release and postsynaptic responses in chemical synapses.',
+    unlocked: false,
+    markdownFile: '/markdown/synaptic-transmission.md',
+    component: 'SynapticTransmissionExperiment'
+  },
+  6: {
+    id: 6,
+    name: 'Respiratory Gas Exchange',
+    description: 'Simulate oxygen and carbon dioxide exchange in pulmonary capillaries.',
+    unlocked: false,
+    markdownFile: '/markdown/respiratory-gas-exchange.md',
+    component: 'RespiratoryExperiment'
+  },
+  7: {
+    id: 7,
+    name: 'Renal Filtration',
+    description: 'Model glomerular filtration and tubular reabsorption processes.',
+    unlocked: false,
+    markdownFile: '/markdown/renal-filtration.md',
+    component: 'RenalExperiment'
+  },
+  8: {
+    id: 8,
+    name: 'Acid-Base Balance',
+    description: 'Explore pH regulation through respiratory and renal compensation mechanisms.',
+    unlocked: false,
+    markdownFile: '/markdown/acid-base-balance.md',
+    component: 'AcidBaseExperiment'
+  },
+  9: {
+    id: 9,
+    name: 'Blood Pressure Regulation',
+    description: 'Study baroreceptor reflexes and autonomic nervous system control.',
+    unlocked: false,
+    markdownFile: '/markdown/blood-pressure-regulation.md',
+    component: 'BloodPressureExperiment'
+  },
+  10: {
+    id: 10,
+    name: 'Cardiac Output',
+    description: 'Model stroke volume, heart rate, and their relationship to cardiac output.',
+    unlocked: false,
+    markdownFile: '/markdown/cardiac-output.md',
+    component: 'CardiacOutputExperiment'
+  },
+  11: {
+    id: 11,
+    name: 'Ventilation-Perfusion Ratio',
+    description: 'Analyze the relationship between alveolar ventilation and pulmonary blood flow.',
+    unlocked: false,
+    markdownFile: '/markdown/ventilation-perfusion.md',
+    component: 'VentilationPerfusionExperiment'
+  },
+  12: {
+    id: 12,
+    name: 'Glucose Metabolism',
+    description: 'Study insulin and glucagon effects on glucose uptake and storage.',
+    unlocked: false,
+    markdownFile: '/markdown/glucose-metabolism.md',
+    component: 'GlucoseMetabolismExperiment'
+  },
+  13: {
+    id: 13,
+    name: 'Electrolyte Balance',
+    description: 'Model sodium, potassium, and calcium homeostasis in the body.',
+    unlocked: false,
+    markdownFile: '/markdown/electrolyte-balance.md',
+    component: 'ElectrolyteExperiment'
+  },
+  14: {
+    id: 14,
+    name: 'Hemoglobin-Oxygen Binding',
+    description: 'Study oxygen-hemoglobin dissociation curve and factors affecting it.',
+    unlocked: false,
+    markdownFile: '/markdown/hemoglobin-oxygen.md',
+    component: 'HemoglobinExperiment'
+  },
+  15: {
+    id: 15,
+    name: 'Muscle Fatigue',
+    description: 'Investigate metabolic and neural factors contributing to muscle fatigue.',
+    unlocked: false,
+    markdownFile: '/markdown/muscle-fatigue.md',
+    component: 'MuscleFatigueExperiment'
+  },
+  16: {
+    id: 16,
+    name: 'Thermoregulation',
+    description: 'Model body temperature regulation through heat production and loss.',
+    unlocked: false,
+    markdownFile: '/markdown/thermoregulation.md',
+    component: 'ThermoregulationExperiment'
+  },
+  17: {
+    id: 17,
+    name: 'Endocrine Feedback Loops',
+    description: 'Study hormone regulation through negative and positive feedback mechanisms.',
+    unlocked: false,
+    markdownFile: '/markdown/endocrine-feedback.md',
+    component: 'EndocrineExperiment'
+  },
+  18: {
+    id: 18,
+    name: 'Immune Response',
+    description: 'Model innate and adaptive immune responses to pathogens.',
+    unlocked: false,
+    markdownFile: '/markdown/immune-response.md',
+    component: 'ImmuneExperiment'
+  },
+  19: {
+    id: 19,
+    name: 'Digestive Enzyme Kinetics',
+    description: 'Study enzyme-substrate interactions in the digestive system.',
+    unlocked: false,
+    markdownFile: '/markdown/digestive-enzymes.md',
+    component: 'DigestiveExperiment'
+  },
+  20: {
+    id: 20,
+    name: 'Neural Plasticity',
+    description: 'Investigate synaptic strength changes and learning mechanisms.',
+    unlocked: false,
+    markdownFile: '/markdown/neural-plasticity.md',
+    component: 'NeuralPlasticityExperiment'
+  }
 };
 
 export default function ExperimentScreen() {
@@ -30,7 +200,6 @@ export default function ExperimentScreen() {
   const [experiment, setExperiment] = useState<Experiment | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [panelMode, setPanelMode] = useState<'side' | 'cover'>('cover');
-  const [panelWidth, setPanelWidth] = useState(32); // Width in rem units
 
   useEffect(() => {
     if (id) {
@@ -55,57 +224,9 @@ export default function ExperimentScreen() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Handle panel resizing with simpler, more robust logic
-  const handleResize = (e: React.MouseEvent) => {
-    if (panelMode !== 'side') return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const startX = e.clientX;
-    const startWidth = panelWidth;
-    
-    const handleMouseMove = (e: MouseEvent) => {
-      const deltaX = startX - e.clientX;
-      const pixelChange = deltaX;
-      const remChange = pixelChange / 16; // Convert pixels to rem
-      let newWidth = startWidth + remChange;
-      
-      // Enforce strict bounds
-      newWidth = Math.max(20, Math.min(48, newWidth));
-      
-      // Only update if within bounds
-      if (newWidth >= 20 && newWidth <= 48) {
-        setPanelWidth(Math.round(newWidth * 10) / 10); // Round to 1 decimal place
-      }
-    };
-    
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-    
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
-
-  // Reset panel width when switching modes
-  const handleModeChange = (newMode: 'side' | 'cover') => {
-    setPanelMode(newMode);
-    if (newMode === 'side') {
-      setPanelWidth(32); // Reset to default width when switching to side mode
-    }
-  };
-
-  // Safety check: ensure panel width stays within bounds
-  useEffect(() => {
-    if (panelWidth < 20) setPanelWidth(20);
-    if (panelWidth > 48) setPanelWidth(48);
-  }, [panelWidth]);
-
   if (!experiment) {
     return (
-      <div className="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col items-center pt-10 pb-10 px-2">
+      <div className="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col items-center pt-20 pb-10 px-2">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-300">Loading experiment...</p>
@@ -118,51 +239,22 @@ export default function ExperimentScreen() {
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col items-center pt-20 pb-10 px-2">
       <div className="w-full max-w-7xl relative">
         {/* Main Content Area */}
-        <div className={`transition-all duration-300 ease-in-out ${
-          isPanelOpen && panelMode === 'side' 
-            ? `lg:mr-[${panelWidth}rem]` // Dynamic margin based on panel width
-            : ''
-        }`}>
-          <ExperimentWorkArea />
+        <div className={`transition-all duration-300 ease-in-out ${isPanelOpen && panelMode === 'side' ? 'lg:mr-[32rem]' : ''}`}>
+          <ExperimentWorkArea 
+            experimentComponents={experimentComponents} 
+            experimentConfigs={experimentConfigs}
+            onExperimentChange={setExperiment}
+          />
         </div>
 
         {/* Side Panel */}
-        <div className={`fixed top-16 right-0 h-[calc(100vh-4rem)] bg-white dark:bg-gray-800 shadow-2xl transition-all duration-300 ease-in-out z-40 ${
-          isPanelOpen 
-            ? 'translate-x-0' 
-            : 'translate-x-full'
-        } ${
-          panelMode === 'side' 
-            ? `w-[${panelWidth}rem] lg:block` // Dynamic width for side mode
-            : 'w-full lg:w-[36rem]' // Fixed width for cover mode
-        }`}>
-          {/* Resize Handle - Only show in side mode */}
-          {/* FINAL ATTEMPT: If resizing still doesn't work, remove this entire resize functionality */}
-          {panelMode === 'side' && (
-            <div 
-              className="absolute left-0 top-0 w-1 h-full bg-gray-300 dark:bg-gray-600 cursor-col-resize hover:bg-emerald-400 dark:hover:bg-emerald-500 transition-colors"
-              onMouseDown={handleResize}
-              title="Drag to resize panel"
-            />
-          )}
-          
-          {/* Reset Width Button - Only show in side mode */}
-          {panelMode === 'side' && (
-            <button
-              onClick={() => setPanelWidth(32)}
-              className="absolute left-2 top-2 p-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 text-xs transition-colors"
-              title="Reset panel width"
-            >
-              ↺
-            </button>
-          )}
-          
+        <div className={`fixed top-16 right-0 h-[calc(100vh-4rem)] bg-white dark:bg-gray-800 shadow-2xl transition-all duration-300 ease-in-out z-40 ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'} ${panelMode === 'side' ? 'w-[32rem] lg:block' : 'w-full lg:w-[36rem]'}`}>
           <ExperimentExplainer 
-            experiment={experiment}
-            isOpen={isPanelOpen}
-            mode={panelMode}
-            onToggle={() => setIsPanelOpen(!isPanelOpen)}
-            onModeChange={handleModeChange}
+            experiment={experiment} 
+            isOpen={isPanelOpen} 
+            mode={panelMode} 
+            onToggle={() => setIsPanelOpen(!isPanelOpen)} 
+            onModeChange={setPanelMode} 
           />
         </div>
 
@@ -172,7 +264,7 @@ export default function ExperimentScreen() {
           className={`fixed top-24 z-50 p-3 rounded-full shadow-lg transition-all duration-300 ${
             isPanelOpen 
               ? panelMode === 'side'
-                ? `bg-emerald-500 hover:bg-emerald-600 text-white right-[calc(${panelWidth}rem+1rem)]` // Dynamic position for side mode
+                ? 'bg-emerald-500 hover:bg-emerald-600 text-white right-[calc(32rem+1rem)]' // Fixed position for side mode
                 : 'bg-emerald-500 hover:bg-emerald-600 text-white right-[calc(36rem+1rem)]' // Fixed position for cover mode
               : 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 right-4' // Default position
           }`}
