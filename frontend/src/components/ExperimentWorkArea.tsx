@@ -74,17 +74,30 @@ export default function ExperimentWorkArea() {
   };
 
   if (!experiment) {
-    return <div>Loading experiment...</div>;
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 min-h-[400px] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Loading experiment...</p>
+        </div>
+      </div>
+    );
   }
 
   const ExperimentComponent = experimentComponents[experiment.component];
   
   if (!ExperimentComponent) {
-    return <div>Experiment component not found: {experiment.component}</div>;
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 min-h-[400px] flex items-center justify-center">
+        <div className="text-center text-red-600 dark:text-red-400">
+          <p>Experiment component not found: {experiment.component}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 min-h-[400px]">
       <h2 className="text-xl font-bold text-emerald-600 dark:text-emerald-300 mb-4">
         {experiment.name}
       </h2>
