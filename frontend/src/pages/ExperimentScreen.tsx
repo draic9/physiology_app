@@ -30,6 +30,7 @@ export default function ExperimentScreen() {
   const [experiment, setExperiment] = useState<Experiment | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [panelMode, setPanelMode] = useState<'side' | 'cover'>('cover');
+  const [panelWidth, setPanelWidth] = useState(32); // Width in rem units
 
   useEffect(() => {
     if (id) {
@@ -54,6 +55,28 @@ export default function ExperimentScreen() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Handle panel resizing
+  const handleResize = (e: React.MouseEvent) => {
+    if (panelMode === 'side') {
+      const startX = e.clientX;
+      const startWidth = panelWidth;
+      
+      const handleMouseMove = (e: MouseEvent) => {
+        const deltaX = startX - e.clientX;
+        const newWidth = Math.max(20, Math.min(48, startWidth + deltaX / 16)); // Convert pixels to rem, min 20rem, max 48rem
+        setPanelWidth(newWidth);
+      };
+      
+      const handleMouseUp = () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+      
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+  };
+
   if (!experiment) {
     return (
       <div className="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col items-center pt-10 pb-10 px-2">
@@ -71,7 +94,7 @@ export default function ExperimentScreen() {
         {/* Main Content Area */}
         <div className={`transition-all duration-300 ease-in-out ${
           isPanelOpen && panelMode === 'side' 
-            ? 'lg:mr-96' // Increased from lg:mr-80 to lg:mr-96 to match wider panel
+            ? `lg:mr-[${panelWidth}rem]` // Dynamic margin based on panel width
             : ''
         }`}>
           <ExperimentWorkArea />
@@ -84,9 +107,17 @@ export default function ExperimentScreen() {
             : 'translate-x-full'
         } ${
           panelMode === 'side' 
-            ? 'w-96 lg:block' // Increased from w-80 to w-96 (384px)
-            : 'w-full lg:w-[28rem]' // Increased from w-96 to w-[28rem] (448px) for cover mode
+            ? `w-[${panelWidth}rem] lg:block` // Dynamic width for side mode
+            : 'w-full lg:w-[36rem]' // Fixed width for cover mode
         }`}>
+          {/* Resize Handle - Only show in side mode */}
+          {panelMode === 'side' && (
+            <div 
+              className="absolute left-0 top-0 w-1 h-full bg-gray-300 dark:bg-gray-600 cursor-col-resize hover:bg-emerald-400 dark:hover:bg-emerald-500 transition-colors"
+              onMouseDown={handleResize}
+              title="Drag to resize panel"
+            />
+          )}
           <ExperimentExplainer 
             experiment={experiment}
             isOpen={isPanelOpen}
@@ -96,12 +127,14 @@ export default function ExperimentScreen() {
           />
         </div>
 
-        {/* Panel Toggle Button - Smart positioning */}
+        {/* Panel Toggle Button - Smart positioning for both modes */}
         <button
           onClick={() => setIsPanelOpen(!isPanelOpen)}
           className={`fixed top-24 z-50 p-3 rounded-full shadow-lg transition-all duration-300 ${
             isPanelOpen 
-              ? 'bg-emerald-500 hover:bg-emerald-600 text-white right-[calc(24rem+1rem)]' // Position to the left of panel when open
+              ? panelMode === 'side'
+                ? `bg-emerald-500 hover:bg-emerald-600 text-white right-[calc(${panelWidth}rem+1rem)]` // Dynamic position for side mode
+                : 'bg-emerald-500 hover:bg-emerald-600 text-white right-[calc(36rem+1rem)]' // Fixed position for cover mode
               : 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 right-4' // Default position
           }`}
           aria-label={isPanelOpen ? 'Close documentation' : 'Open documentation'}
