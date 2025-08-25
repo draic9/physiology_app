@@ -7,8 +7,7 @@ import {
   BoltIcon, 
   InformationCircleIcon,
   ChevronDownIcon,
-  ChevronUpIcon,
-  HeartIcon
+  ChevronUpIcon
 } from '@heroicons/react/24/outline';
 import type { ExperimentData, ExperimentResult } from '../types/experiment';
 

@@ -4,14 +4,10 @@ import type { Experiment } from '../types/experiment';
 import ExperimentWorkArea from '../components/ExperimentWorkArea';
 import ExperimentExplainer from '../components/ExperimentExplainer';
 import CardiacActionPotentialSimulator from '../experiments/CardiacActionPotentialSimulator';
-import CardiacMuscleExperiment from '../experiments/CardiacMuscleExperiment';
-import CardiomyocytePotentialExperiment from '../experiments/CardiomyocytePotentialExperiment';
 
 // Component mapping for experiments
 const experimentComponents: Record<string, React.ComponentType<any>> = {
   'CardiacActionPotentialSimulator': CardiacActionPotentialSimulator,
-  'CardiacMuscleExperiment': CardiacMuscleExperiment,
-  'CardiomyocytePotentialExperiment': CardiomyocytePotentialExperiment,
   'NerveConductionExperiment': () => <div>Loading Nerve Conduction Experiment...</div>,
   'SynapticTransmissionExperiment': () => <div>Loading Synaptic Transmission Experiment...</div>,
   'RespiratoryExperiment': () => <div>Loading Respiratory Gas Exchange Experiment...</div>,
