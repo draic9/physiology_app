@@ -23,7 +23,12 @@ const CardiacActionPotentialSimulator = ({
   isRunning
 }: CardiacActionPotentialSimulatorProps) => {
   const [time, setTime] = useState(0);
-  const [data, setData] = useState<Array<{time: number, voltage: number, stimulated: boolean}>>([]);
+  const [data, setData] = useState<Array<{time: number, voltage: number, stimulated: boolean}>>([
+    // Initialize with multiple points to ensure graph renders
+    { time: 0, voltage: -90, stimulated: false },
+    { time: 0.01, voltage: -90, stimulated: false },
+    { time: 0.02, voltage: -90, stimulated: false }
+  ]);
   const [drugs, setDrugs] = useState({
     TTX: { concentration: 0, active: false },
     verapamil: { concentration: 0, active: false },
@@ -72,7 +77,16 @@ const CardiacActionPotentialSimulator = ({
   const calculateActionPotential = useCallback((t: number, stimulated: boolean) => {
     const params = baseParams[cellType as keyof typeof baseParams];
     const cycleDuration = 1000 / stimulationRate; // ms
-    const timeInCycle = t % cycleDuration;
+    const stimulationDelay = 50; // Reduced from 100ms to 50ms
+    
+    // Calculate time relative to when stimulation should start
+    const timeSinceStimulationStart = Math.max(0, t - stimulationDelay);
+    const timeInCycle = timeSinceStimulationStart % cycleDuration;
+    
+    // During the delay period, return resting potential
+    if (t < stimulationDelay) {
+      return params.restingPotential;
+    }
     
     if (!stimulated && timeInCycle > params.apd90) {
       return params.restingPotential;
@@ -130,7 +144,10 @@ const CardiacActionPotentialSimulator = ({
       setTime(prevTime => {
         const newTime = prevTime + simulationSpeed;
         const cycleDuration = 1000 / stimulationRate;
-        const shouldStimulate = newTime % cycleDuration < 5;
+        const stimulationDelay = 50; // Reduced from 100ms to 50ms
+        
+        // Only stimulate after initial delay and at appropriate intervals
+        const shouldStimulate = newTime >= stimulationDelay && (newTime - stimulationDelay) % cycleDuration < 5;
         
         const voltage = calculateActionPotential(newTime, shouldStimulate);
         
@@ -171,13 +188,20 @@ const CardiacActionPotentialSimulator = ({
     };
   }, [isRunning, animate]);
 
+  const handleRun = () => {
+    onRun();
+  };
+
   const handleReset = () => {
-    // Zatrzymaj symulację
-    onRun(); // This will stop the simulation via parent
-    
     // Reset stanu
     setTime(0);
-    setData([]);
+    const currentParams = baseParams[cellType as keyof typeof baseParams];
+    setData([
+      // Reset to initial points
+      { time: 0, voltage: currentParams.restingPotential, stimulated: false },
+      { time: 0.01, voltage: currentParams.restingPotential, stimulated: false },
+      { time: 0.02, voltage: currentParams.restingPotential, stimulated: false }
+    ]);
     
     // Reset timing state
     lastUpdateTime.current = 0;
@@ -199,7 +223,8 @@ const CardiacActionPotentialSimulator = ({
     }));
   };
 
-  const currentVoltage = data.length > 0 ? data[data.length - 1].voltage : baseParams[cellType as keyof typeof baseParams].restingPotential;
+  const currentParams = baseParams[cellType as keyof typeof baseParams];
+  const currentVoltage = data.length > 0 ? data[data.length - 1].voltage : currentParams.restingPotential;
   const isStimulated = data.length > 0 ? data[data.length - 1].stimulated : false;
 
   // Calculate current phase
@@ -233,7 +258,7 @@ const CardiacActionPotentialSimulator = ({
           <div className="space-y-4">
             <div className="flex gap-3">
               <button
-                onClick={onRun}
+                onClick={handleRun}
                 className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-colors ${
                   isRunning 
                     ? 'bg-red-500 hover:bg-red-600 text-white' 
@@ -366,7 +391,14 @@ const CardiacActionPotentialSimulator = ({
                   return (
                     <g key={voltage}>
                       <line x1="60" y1={y} x2="760" y2={y} />
-                      <text x="50" y={y + 4} fontSize="10" textAnchor="end" fill={isDarkMode ? "#9ca3af" : "#6b7280"}>
+                      <text 
+                        x="50" 
+                        y={y + 4} 
+                        fontSize="10" 
+                        textAnchor="end" 
+                        fill={isDarkMode ? "#d1d5db" : "#374151"}
+                        className="font-medium"
+                      >
                         {voltage}mV
                       </text>
                     </g>
@@ -378,7 +410,14 @@ const CardiacActionPotentialSimulator = ({
                   return (
                     <g key={t}>
                       <line x1={x} y1="20" x2={x} y2="280" />
-                      <text x={x} y="295" fontSize="10" textAnchor="middle" fill={isDarkMode ? "#9ca3af" : "#6b7280"}>
+                      <text 
+                        x={x} 
+                        y="295" 
+                        fontSize="10" 
+                        textAnchor="middle" 
+                        fill={isDarkMode ? "#d1d5db" : "#374151"}
+                        className="font-medium"
+                      >
                         {t}ms
                       </text>
                     </g>
@@ -387,7 +426,7 @@ const CardiacActionPotentialSimulator = ({
               </g>
               
               {/* Oś X i Y */}
-              <g stroke={isDarkMode ? "#d1d5db" : "#374151"} strokeWidth="2">
+              <g stroke={isDarkMode ? "#6b7280" : "#1f2937"} strokeWidth="2">
                 <line x1="60" y1="20" x2="60" y2="280" />
                 <line x1="60" y1="280" x2="760" y2="280" />
               </g>
@@ -422,15 +461,6 @@ const CardiacActionPotentialSimulator = ({
                   />
                 );
               })}
-              
-              {/* Etykiety faz */}
-              <g fontSize="12" fill={isDarkMode ? "#d1d5db" : "#4b5563"} textAnchor="middle">
-                <text x="100" y="15">Faza 0</text>
-                <text x="150" y="15">Faza 1</text>
-                <text x="300" y="15">Faza 2 (Plateau)</text>
-                <text x="500" y="15">Faza 3</text>
-                <text x="650" y="15">Faza 4</text>
-              </g>
             </svg>
           </div>
           

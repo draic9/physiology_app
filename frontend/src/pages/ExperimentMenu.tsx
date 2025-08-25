@@ -13,19 +13,19 @@ const experiments: Experiment[] = [
   },
   {
     id: 2,
-    name: 'Cardiac Muscle Physiology',
-    description: 'The first attempt at creating the experiment.',
-    unlocked: true,
-    markdownFile: '/markdown/cardiac-muscle.md',
-    component: 'CardiacMuscleExperiment'
+    name: 'Digestive Enzyme Kinetics',
+    description: 'Study enzyme-substrate interactions in the digestive system.',
+    unlocked: false,
+    markdownFile: '/markdown/digestive-enzymes.md',
+    component: 'DigestiveExperiment'
   },
   {
     id: 3,
-    name: 'Cardiomyocyte Potential Template',
-    description: 'A blank canvas for another attempt at making the experiment.',
-    unlocked: true,
-    markdownFile: '/markdown/cardiomyocyte-potential.md',
-    component: 'CardiomyocytePotentialExperiment'
+    name: 'Neural Plasticity',
+    description: 'Investigate synaptic strength changes and learning mechanisms.',
+    unlocked: false,
+    markdownFile: '/markdown/neural-plasticity.md',
+    component: 'NeuralPlasticityExperiment'
   },
   {
     id: 4,
@@ -146,22 +146,6 @@ const experiments: Experiment[] = [
     unlocked: false,
     markdownFile: '/markdown/immune-response.md',
     component: 'ImmuneExperiment'
-  },
-  {
-    id: 19,
-    name: 'Digestive Enzyme Kinetics',
-    description: 'Study enzyme-substrate interactions in the digestive system.',
-    unlocked: false,
-    markdownFile: '/markdown/digestive-enzymes.md',
-    component: 'DigestiveExperiment'
-  },
-  {
-    id: 20,
-    name: 'Neural Plasticity',
-    description: 'Investigate synaptic strength changes and learning mechanisms.',
-    unlocked: false,
-    markdownFile: '/markdown/neural-plasticity.md',
-    component: 'NeuralPlasticityExperiment'
   }
 ];
 
